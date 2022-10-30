@@ -29,7 +29,7 @@ public class kafkaConsumer {
         this.eventParticipantService = eventParticipantService;
     }
     @Transactional
-    @KafkaListener(topics = "v4-event-topic")
+    @KafkaListener(topics = "v1-event-topic")
     public void updateQty(String kafkaMessage) {
         log.info("kafka Message : =>" + kafkaMessage);
 

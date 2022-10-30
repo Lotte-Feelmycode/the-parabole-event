@@ -32,7 +32,7 @@ public class EventApplyController {
         @RequestBody EventApplyDto dto) {
 
         eventParticipantService.applyCheck(dto);
-        kafkaProducer.send("v4-event-topic", dto);
+        kafkaProducer.send("v1-event-topic", dto);
 
         return ParaboleResponse.CommonResponse(HttpStatus.CREATED, true, "응모가 완료 되었습니다");
     }
