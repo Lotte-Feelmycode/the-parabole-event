@@ -7,11 +7,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(name="parabole")
-public interface ServiceClient {
+public interface ProductServiceClient {
 
     @GetMapping("/api/v1/product/data")
-    ProductResponseDto getProduct(@RequestParam Long productId);
+    ProductResponseDto getProduct(@RequestParam("productId") Long productId);
 
     @GetMapping("/api/v1/coupon/data")
-    CouponDto getCouponData(@RequestParam Long couponId);
+    CouponDto getCouponData(@RequestParam("couponId") Long couponId);
 }

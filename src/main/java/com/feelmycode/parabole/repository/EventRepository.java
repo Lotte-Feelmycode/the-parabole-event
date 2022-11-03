@@ -24,4 +24,9 @@ public interface EventRepository extends JpaRepository<Event, Long> {
         LocalDateTime endDateTime, boolean isDeleted);
 
     List<Event> findAllByStatusAndIsDeleted(Integer eventStatus, boolean isDeleted);
+
+    List<Event> findAllByStatus(Integer status);
+
+    Event findByStatusAndType(Integer status, String eventType);
+
 }

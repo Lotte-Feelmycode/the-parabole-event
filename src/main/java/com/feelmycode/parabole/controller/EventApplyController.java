@@ -48,11 +48,11 @@ public class EventApplyController {
             dto.getEventId() + "번 이벤트에 응모한적이 없습니다", true);
     }
 
-      @GetMapping("/seller/participant/{eventId}")
-      public ResponseEntity<ParaboleResponse> getEventParticipants(@PathVariable Long eventId) {
-          List<EventParticipantDto> response = eventParticipantService.getEventParticipants(eventId);
-          return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 응모 리스트 조회 성공", response);
-      }
+    @GetMapping("/seller/participant/{eventId}")
+    public ResponseEntity<ParaboleResponse> getEventParticipants(@PathVariable Long eventId) {
+        List<EventParticipantDto> response = eventParticipantService.getEventParticipants(eventId);
+        return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 응모 리스트 조회 성공", response);
+    }
 
     @GetMapping("/user/participant/{userId}")
     public ResponseEntity<ParaboleResponse> getUserEventParticipants(@PathVariable Long userId) {

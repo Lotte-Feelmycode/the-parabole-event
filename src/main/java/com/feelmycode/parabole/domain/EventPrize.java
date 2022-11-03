@@ -41,6 +41,10 @@ public class EventPrize {
         this.event = event;
     }
 
+    public void setStock(Integer stock) {
+        this.stock = stock;
+    }
+
     @Builder
     public EventPrize(String prizeType, Integer stock, Long prizeId) {
         this.prizeType = prizeType;

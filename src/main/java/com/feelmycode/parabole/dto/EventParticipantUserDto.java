@@ -19,6 +19,7 @@ public class EventParticipantUserDto {
     private LocalDateTime endAt;
     private Integer status;
     private String eventImg;
+    private String winnerStatus;
 
     public EventParticipantUserDto(EventParticipant eventParticipant) {
         Event event = eventParticipant.getEvent();
@@ -30,5 +31,6 @@ public class EventParticipantUserDto {
         this.endAt = event.getEndAt();
         this.status = event.getStatus();
         this.eventImg = event.getEventImage().getEventBannerImg();
+        this.winnerStatus = "미추첨";
     }
 }
