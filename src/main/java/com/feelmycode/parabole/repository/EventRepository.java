@@ -29,4 +29,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Event findByStatusAndType(Integer status, String eventType);
 
+    List<Event> findAllBySellerIdAndStatus(Long sellerId, Integer status);
+
 }
