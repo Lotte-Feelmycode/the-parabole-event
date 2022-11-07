@@ -20,7 +20,7 @@ public class EventWinnerController {
     private final EventWinnerService eventWinnerService;
 
     @GetMapping("/seller/eventwinner/list/{eventId}")
-    public ResponseEntity<ParaboleResponse> getSellerEventWinnerList(@PathVariable Long eventId) {
+    public ResponseEntity<ParaboleResponse> getEventWinnerList(@PathVariable Long eventId) {
         List<EventWinnerDto> response = eventWinnerService.eventWinnerList(eventId);
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "셀러 이벤트 응모자 리스트 조회", response);
     }
