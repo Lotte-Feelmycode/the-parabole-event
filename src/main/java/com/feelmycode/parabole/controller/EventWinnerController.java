@@ -13,15 +13,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RequiredArgsConstructor
-@RequestMapping("/api/v2/event")
+@RequestMapping("/api/v1/event")
 @RestController
 public class EventWinnerController {
 
     private final EventWinnerService eventWinnerService;
 
-    @GetMapping("/seller/eventWinner/list/{sellerId}")
-    public ResponseEntity<ParaboleResponse> getSellerEventWinnerList(@PathVariable Long sellerId) {
-        List<EventWinnerDto> response = eventWinnerService.eventWinnerList(sellerId);
+    @GetMapping("/seller/eventWinner/list/{eventId}")
+    public ResponseEntity<ParaboleResponse> getSellerEventWinnerList(@PathVariable Long eventId) {
+        List<EventWinnerDto> response = eventWinnerService.eventWinnerList(eventId);
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "셀러 이벤트 응모자 리스트 조회", response);
     }
+
 }
