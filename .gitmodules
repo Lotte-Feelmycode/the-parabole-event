@@ -1,3 +1,4 @@
-[submodule "src/main/resources/submodule-security"]
-	path = src/main/resources/submodule-security
+[submodule "src/main/resources/event-submodule-security"]
+	path = src/main/resources/event-submodule-security
+
 	url = https://github.com/Lotte-Feelmycode/event-submodule-security.git
