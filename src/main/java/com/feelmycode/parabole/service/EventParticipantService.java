@@ -15,7 +15,6 @@ import com.feelmycode.parabole.repository.EventRepository;
 import com.feelmycode.parabole.repository.EventWinnerRepository;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -23,7 +22,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -44,14 +42,35 @@ public class EventParticipantService {
     private final EventWinnerRepository eventWinnerRepository;
 
     public List<EventParticipantUserDto> getEventParticipantUser(Long userId) {
-        List<EventParticipant> eventParticipant = eventParticipantRepository.findAllByUserId(
+        List<EventParticipant> eventParticipantList = eventParticipantRepository.findAllByUserId(
             userId);
-
-        if (eventParticipant == null) {
+        List<EventParticipantUserDto> result = new ArrayList<>();
+        if (eventParticipantList == null) {
             throw new ParaboleException(HttpStatus.NOT_FOUND, "이벤트 참여내역이 없습니다.");
         }
-        return eventParticipant.stream().map(EventParticipantUserDto::new)
-            .collect(Collectors.toList());
+        for (EventParticipant eventParticipant : eventParticipantList) {
+            boolean eventWinnerCheck = eventWinnerRepository.existsByEventId(
+                eventParticipant.getEvent().getId());
+            if (eventWinnerCheck) {
+                EventParticipantUserDto eventParticipantUserDto = new EventParticipantUserDto(
+                    eventParticipant);
+                EventWinner eventWinner = eventWinnerRepository.findByUserIdAndEventId(userId,
+                    eventParticipant.getEvent().getId());
+                if (eventWinner != null) {
+                    eventParticipantUserDto.setPrizeName(
+                        eventWinner.getEventPrize().getPrizeName());
+                    eventParticipantUserDto.setWinnerStatus("당첨");
+                    result.add(eventParticipantUserDto);
+                } else {
+                    eventParticipantUserDto.setWinnerStatus("미당첨");
+                    result.add(eventParticipantUserDto);
+                }
+            } else {
+                result.add(new EventParticipantUserDto(eventParticipant));
+            }
+        }
+
+        return result;
     }
 
     public void eventJoin(EventApplyDto eventApplyDto) {
