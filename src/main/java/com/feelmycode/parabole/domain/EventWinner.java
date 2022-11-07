@@ -9,13 +9,11 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 
 @Entity
 @Table(name = "event_winners")
 @Getter
 @NoArgsConstructor
-@ToString
 public class EventWinner {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

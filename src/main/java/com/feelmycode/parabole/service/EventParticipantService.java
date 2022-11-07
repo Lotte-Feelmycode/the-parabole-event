@@ -51,7 +51,6 @@ public class EventParticipantService {
         for (EventParticipant eventParticipant : eventParticipantList) {
             boolean eventWinnerCheck = eventWinnerRepository.existsByEventId(
                 eventParticipant.getEvent().getId());
-            System.out.println(eventWinnerCheck);
             if (eventWinnerCheck) {
                 EventParticipantUserDto eventParticipantUserDto = new EventParticipantUserDto(
                     eventParticipant);

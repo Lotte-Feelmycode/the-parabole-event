@@ -9,7 +9,6 @@ import com.feelmycode.parabole.dto.EventCreateRequestDto;
 import com.feelmycode.parabole.dto.EventListResponseDto;
 import com.feelmycode.parabole.dto.EventPrizeCreateRequestDto;
 import com.feelmycode.parabole.dto.EventPrizeDto;
-import com.feelmycode.parabole.dto.EventSearchRequestDto;
 import com.feelmycode.parabole.dto.EventSearchResponseDto;
 import com.feelmycode.parabole.dto.ProductResponseDto;
 import com.feelmycode.parabole.global.error.exception.ParaboleException;
@@ -140,9 +139,7 @@ public class EventService {
             eventType.equals("") ? Arrays.asList("RAFFLE", "FCFS") : Arrays.asList(eventType);
         List<Integer> statuses =
             eventStatus < 0 ? Arrays.asList(0, 1, 2) : Arrays.asList(eventStatus);
-
-        System.out.println("eventStatus" + eventStatus);
-        System.out.println("statues " + statuses);
+        
         if (dateDiv > -1) {
             eventList = dateDiv < 1
                 ? eventRepository.findAllByStartAtBetweenAndIsDeleted(fromDateTime, toDateTime,
