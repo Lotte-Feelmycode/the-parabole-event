@@ -22,8 +22,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "events", uniqueConstraints = {
-    @UniqueConstraint(name = "event_seller_unique", columnNames = {"event_id", "seller_id"})})
+@Table(name = "events")
 @Getter
 @NoArgsConstructor
 public class Event extends BaseEntity implements Serializable {
@@ -33,7 +32,6 @@ public class Event extends BaseEntity implements Serializable {
     @Column(name = "event_id")
     private Long id;
 
-    @Column(name="seller_id")
     private Long sellerId;
 
     @Column(name = "created_by")
