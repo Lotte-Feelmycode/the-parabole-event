@@ -37,6 +37,8 @@ public class EventPrize {
 
     private Long productId;
 
+    private String prizeName;
+
     public void setEvent(Event event) {
         this.event = event;
     }

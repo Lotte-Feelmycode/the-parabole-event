@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v2/event")
+@RequestMapping("/api/v1/event")
 @RequiredArgsConstructor
 public class EventApplyController {
 
