@@ -92,10 +92,10 @@ test {
 //    }
 //}
 //
-//processResources.dependsOn('ymlSecurity')
-//
-//task ymlSecurity(type: Copy) {
-//    from './src/main/resources/submodule-security'
-//    include '*.yml'
-//    into './src/main/resources'
-//}
+processResources.dependsOn('ymlSecurity')
+
+task ymlSecurity(type: Copy) {
+    from './src/main/resources/event-submodule-security'
+    include '*.yml'
+    into './src/main/resources'
+}
