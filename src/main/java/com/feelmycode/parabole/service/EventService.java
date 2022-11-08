@@ -1,6 +1,7 @@
 package com.feelmycode.parabole.service;
 
 
+import com.feelmycode.parabole.client.CouponServiceClient;
 import com.feelmycode.parabole.client.ProductServiceClient;
 import com.feelmycode.parabole.domain.Event;
 import com.feelmycode.parabole.domain.EventPrize;
@@ -17,6 +18,7 @@ import com.feelmycode.parabole.repository.EventRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +27,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 @Service
 @Slf4j
@@ -34,6 +35,7 @@ public class EventService {
 
     private final EventRepository eventRepository;
     private final ProductServiceClient ProductServiceClient;
+    private final CouponServiceClient couponServiceClient;
     private final EventPrizeRepository eventPrizeRepository;
 
     private final EventParticipantService eventParticipantService;
@@ -43,6 +45,24 @@ public class EventService {
             .map(EventListResponseDto::new)
             .collect(Collectors.toList());
     }
+
+
+    private EventPrizeDto productPrize(EventPrize eventPrize) {
+        ProductResponseDto product = ProductServiceClient.getProduct(eventPrize.getProductId());
+
+        return new EventPrizeDto(eventPrize.getId(), eventPrize.getPrizeType(),
+            eventPrize.getStock(),
+            product.getProductId(), product.getProductName(), product.getProductImg());
+    }
+
+    private EventPrizeDto couponPrize(EventPrize eventPrize) {
+        CouponDto coupon = couponServiceClient.getCouponData(eventPrize.getCouponId());
+
+        return new EventPrizeDto(eventPrize.getId(), eventPrize.getPrizeType(),
+            eventPrize.getStock(), coupon.getCouponId(), coupon.getCouponDetail(),
+            coupon.getCouponDiscountValue(), coupon.getExpiresAt());
+    }
+
 
     /**
      * 이벤트 생성
@@ -64,6 +84,7 @@ public class EventService {
             for (EventPrizeCreateRequestDto eventPrizeParam : eventPrizeParams) {
                 String prizeType = eventPrizeParam.getType();
                 Long id = eventPrizeParam.getId();
+
                 if (prizeType.equals("PRODUCT")) {
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrizeParam.getStock(),
@@ -71,7 +92,7 @@ public class EventService {
                 } else {
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrizeParam.getStock(),
-                            ProductServiceClient.getCouponData(id).getCouponId()));
+                            couponServiceClient.getCouponData(id).getCouponId()));
                 }
             }
         }
@@ -95,27 +116,18 @@ public class EventService {
     public EventListResponseDto getEventByEventId(Long eventId) {
         Event event = eventRepository.findById(eventId)
             .orElseThrow(() -> new ParaboleException(HttpStatus.NOT_FOUND, "해당하는 ID의 이벤트가 없습니다"));
-        List<EventPrize> eventPrize = eventPrizeRepository.findByEventId(eventId);
+
+        List<EventPrize> eventPrizes = eventPrizeRepository.findByEventId(eventId);
         List<EventPrizeDto> eventPrizeDtos = new ArrayList<>();
-        for (EventPrize eventPrizes : eventPrize) {
-            System.out.println(eventPrizes.getId() + " " + eventPrizes.getPrizeType());
-            if (eventPrizes.getPrizeType().equals("PRODUCT")) {
-                ProductResponseDto productResponseDto = ProductServiceClient.getProduct(
-                    eventPrizes.getProductId());
-                eventPrizeDtos.add(
-                    new EventPrizeDto(eventPrizes.getId(), eventPrizes.getPrizeType(),
-                        eventPrizes.getStock(),
-                        productResponseDto.getProductId(), productResponseDto.getProductName(),
-                        productResponseDto.getProductImg()));
-            } else if (eventPrizes.getPrizeType().equals("COUPON")) {
-                CouponDto couponDto = ProductServiceClient.getCouponData(eventPrizes.getCouponId());
-                eventPrizeDtos.add(
-                    new EventPrizeDto(eventPrizes.getId(), eventPrizes.getPrizeType(),
-                        eventPrizes.getStock(), couponDto.getCouponId(),
-                        couponDto.getCouponDetail(), couponDto.getCouponDiscountValue(),
-                        couponDto.getExpiresAt()));
+
+        eventPrizes.forEach(e -> {
+            if (e.getPrizeType().equals("PRODUCT")) {
+                eventPrizeDtos.add(productPrize(e));
+            } else if (e.getPrizeType().equals("COUPON")) {
+                eventPrizeDtos.add(couponPrize(e));
             }
-        }
+        });
+
         return new EventListResponseDto(event, eventPrizeDtos);
     }
 
@@ -139,7 +151,7 @@ public class EventService {
             eventType.equals("") ? Arrays.asList("RAFFLE", "FCFS") : Arrays.asList(eventType);
         List<Integer> statuses =
             eventStatus < 0 ? Arrays.asList(0, 1, 2) : Arrays.asList(eventStatus);
-        
+
         if (dateDiv > -1) {
             eventList = dateDiv < 1
                 ? eventRepository.findAllByStartAtBetweenAndIsDeleted(fromDateTime, toDateTime,
@@ -166,7 +178,20 @@ public class EventService {
         return eventRepository.findAllByIsDeleted(false);
     }
 
-    // TODO : 이벤트 수정
+    /**
+     * 이벤트 조회 (셀러 오피스 이벤트 목록 조회용)
+     */
+    public List<EventSearchResponseDto> getEventsMonthAfter() {
+        LocalDateTime nowDate = LocalDateTime.now();
+        LocalDateTime monthAfterDate = nowDate.plusMonths(1L);
+        return eventRepository.findAllByStartAtBetweenAndIsDeleted(nowDate,
+                monthAfterDate, false)
+            .stream()
+            .filter(event -> event.getType().equals("FCFS"))
+            .sorted(Comparator.comparing(Event::getStartAt))
+            .map(EventSearchResponseDto::new)
+            .collect(Collectors.toList());
+    }
 
     /**
      * 이벤트 취소
@@ -177,6 +202,13 @@ public class EventService {
             .orElseThrow(() -> new ParaboleException(HttpStatus.NOT_FOUND, "해당 이벤트가 존재하지 않습니다."));
         try {
             event.cancel();
+//            event.getEventPrizes().forEach(e -> {
+//                if (e.getPrizeType().equals("PRODUCT")) {
+//                    ProductServiceClient.addRemains(e.getProductId(), e.getStock());
+//                } else if (e.getPrizeType().equals("COUPON")) {
+//                    couponServiceClient.cancelCouponEvent(e.getCouponId(), e.getStock());
+//                }
+//            });
             eventRepository.save(event);
         } catch (Exception e) {
             throw new ParaboleException(HttpStatus.INTERNAL_SERVER_ERROR, "이벤트 등록 실패");
