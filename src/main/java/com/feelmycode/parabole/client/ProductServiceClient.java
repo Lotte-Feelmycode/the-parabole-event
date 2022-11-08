@@ -12,6 +12,7 @@ public interface ProductServiceClient {
     @GetMapping("/api/v1/product/data")
     ProductResponseDto getProduct(@RequestParam("productId") Long productId);
 
-    @GetMapping("/api/v1/coupon/data")
-    CouponDto getCouponData(@RequestParam("couponId") Long couponId);
+//    @GetMapping("/api/v1/product/{productId}/stock/{stock}")
+//    Boolean addRemains(@RequestParam("productId") Long productId, @RequestParam("stock") Integer stock);
+
 }
