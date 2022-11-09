@@ -7,7 +7,7 @@ logging:
 
 spring:
   profiles:
-    active: local
+    active: dev
   application:
     name: the-parabole-event
 
