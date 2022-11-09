@@ -1,7 +1,6 @@
 package com.feelmycode.parabole.service;
 
 
-import com.feelmycode.parabole.client.CouponServiceClient;
 import com.feelmycode.parabole.client.ProductServiceClient;
 import com.feelmycode.parabole.domain.Event;
 import com.feelmycode.parabole.domain.EventPrize;
@@ -34,8 +33,7 @@ import org.springframework.util.CollectionUtils;
 public class EventService {
 
     private final EventRepository eventRepository;
-    private final ProductServiceClient ProductServiceClient;
-    private final CouponServiceClient couponServiceClient;
+    private final ProductServiceClient productServiceClient;
     private final EventPrizeRepository eventPrizeRepository;
 
     private final EventParticipantService eventParticipantService;
@@ -48,7 +46,7 @@ public class EventService {
 
 
     private EventPrizeDto productPrize(EventPrize eventPrize) {
-        ProductResponseDto product = ProductServiceClient.getProduct(eventPrize.getProductId());
+        ProductResponseDto product = productServiceClient.getProduct(eventPrize.getProductId());
 
         return new EventPrizeDto(eventPrize.getId(), eventPrize.getPrizeType(),
             eventPrize.getStock(),
@@ -56,7 +54,7 @@ public class EventService {
     }
 
     private EventPrizeDto couponPrize(EventPrize eventPrize) {
-        CouponDto coupon = couponServiceClient.getCouponData(eventPrize.getCouponId());
+        CouponDto coupon = productServiceClient.getCouponData(eventPrize.getCouponId());
 
         return new EventPrizeDto(eventPrize.getId(), eventPrize.getPrizeType(),
             eventPrize.getStock(), coupon.getCouponId(), coupon.getCouponDetail(),
@@ -71,8 +69,10 @@ public class EventService {
     // TODO: @Valid
     @Transactional
     public Long createEvent(EventCreateRequestDto eventDto) {
+        log.info("이벤트 서비스 In");
 
         // 엔티티 조회
+        // seller id 보내는걸로 변경
         Long sellerId = eventDto.getUserId();
 
         // 이벤트-경품정보 생성
@@ -81,21 +81,32 @@ public class EventService {
         List<EventPrizeCreateRequestDto> eventPrizeParams = eventDto.getEventPrizeCreateRequestDtos();
 
         if (!CollectionUtils.isEmpty(eventPrizeParams)) {
+            log.info("eventPrizeParams 존재");
+
             for (EventPrizeCreateRequestDto eventPrizeParam : eventPrizeParams) {
                 String prizeType = eventPrizeParam.getType();
                 Long id = eventPrizeParam.getId();
 
                 if (prizeType.equals("PRODUCT")) {
+                    log.info("eventPrizeParams PRODUCT");
+                    log.info("PRODUCT ID / eventPrizeParam.getId() : {}", id);
+                    log.info("ParaboleServiceClient.getProduct(id) : {} ",
+                        productServiceClient.getProduct(id).getProductId());
+                    // 페인클라이언트로 조회가 안되는 상태임
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrizeParam.getStock(),
-                            ProductServiceClient.getProduct(id).getProductId()));
+                            productServiceClient.getProduct(id).getProductId()));
                 } else {
+                    log.info("eventPrizeParams COUPON");
+
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrizeParam.getStock(),
-                            couponServiceClient.getCouponData(id).getCouponId()));
+                            productServiceClient.getCouponData(id).getCouponId()));
                 }
             }
         }
+
+        log.info("eventPrizeList 생성 완료"  + eventPrizeList.size());
 
         // 이벤트 생성
         Event event = Event.builder()
@@ -105,8 +116,13 @@ public class EventService {
             .descript(eventDto.getDescript()).eventImage(eventDto.getEventImage())
             .eventPrizes(eventPrizeList).build();
 
+        log.info("event객체 생성 완료"  + event.getTitle());
+
         // 이벤트 저장
         eventRepository.save(event);
+
+        log.info("event객체 저장 완료"  + event.getId());
+
         return event.getId();
     }
 
