@@ -16,7 +16,6 @@ import org.springframework.stereotype.Service;
 public class EventWinnerService {
 
     private final EventWinnerRepository eventWinnerRepository;
-    private final EventRepository eventRepository;
 
     public List<EventWinnerDto> eventWinnerList(Long eventId) {
         List<EventWinner> eventWinnerList = eventWinnerRepository.findAllByEventId(eventId);
