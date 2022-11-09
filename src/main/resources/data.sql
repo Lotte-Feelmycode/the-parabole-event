@@ -18,10 +18,3 @@ insert into event_prizes(event_id, prize_type, product_id, stock, prize_name) va
 
 insert into event_prizes(event_id, prize_type, coupon_id, stock,prize_name) values (4, 'COUPON', 1, 10,'크리스마스 겸 연말 쿠폰');
 insert into event_prizes(event_id, prize_type, product_id, stock, prize_name) values (4, 'PRODUCT', 5, 10,'물냉면');
-
-INSERT INTO event_participants(event_id, event_time_start_at,event_prize_id, user_id) VALUES(1,now(),1,3);
-INSERT INTO event_participants(event_id, event_time_start_at,event_prize_id, user_id) VALUES(1,now(),2,3);
-INSERT INTO event_participants(event_id, event_time_start_at,event_prize_id, user_id) VALUES(1,now(),2,3);
-INSERT INTO event_participants(event_id, event_time_start_at,event_prize_id, user_id) VALUES(2,now(),3,3);
-INSERT INTO event_participants(event_id, event_time_start_at,event_prize_id, user_id) VALUES(2,now(),4,3);
-INSERT INTO event_participants(event_id, event_time_start_at,event_prize_id, user_id) VALUES(2,now(),5,3);
