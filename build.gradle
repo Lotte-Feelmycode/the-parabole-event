@@ -1,21 +1,21 @@
-//buildscript {
-//    ext {
-//        restdocsApiSpecVersion = '0.16.2'
-//    }
-//}
+buildscript {
+    ext {
+        restdocsApiSpecVersion = '0.16.2'
+    }
+}
 
 plugins {
     id 'org.springframework.boot' version '2.7.3'
     id 'io.spring.dependency-management' version '1.0.13.RELEASE'
     id 'java'
-    //   id 'org.asciidoctor.jvm.convert' version "3.3.2"
+    id 'org.asciidoctor.jvm.convert' version "3.3.2"
 }
 group = 'com.feelmycode.parabole'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '17'
 
 configurations {
-    // asciidoctorExtensions
+    asciidoctorExtensions
     all {
         exclude group: 'org.springframework.boot', module: 'spring-boot-starter-logging'
     }
@@ -48,54 +48,53 @@ dependencies {
     implementation 'mysql:mysql-connector-java'
     compileOnly 'org.projectlombok:lombok'
 
-    // implementation 'junit:junit:4.13.1'
     annotationProcessor 'org.projectlombok:lombok'
 
-    //  testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
-    //  testImplementation 'io.rest-assured:rest-assured'
+    testImplementation 'org.springframework.restdocs:spring-restdocs-restassured'
+    testImplementation 'io.rest-assured:rest-assured'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 ext {
     set('springCloudVersion', "2021.0.4")
-    // snippetsDir = file("./src/main/resources/snippets")
+    snippetsDir = file("./src/main/resources/snippets")
 }
 
 test {
-    // outputs.dir snippetsDir
+     outputs.dir snippetsDir
 //    useJUnitPlatform{
-//       // includeEngines 'junit-vintage'
+//        includeEngines 'junit-vintage'
 //    }
 }
-//
-//asciidoctor {
-//    dependsOn test
-//    configurations 'asciidoctorExtensions'
-//    inputs.dir snippetsDir
-//}
 
-//build {
-//    dependsOn asciidoctor
-//    copy {
-//        from "./build/docs/asciidoc"
-//        include '*.html'
-//        into "./src/main/resources/static/docs/"
-//    }
-//}
+asciidoctor {
+    dependsOn test
+    configurations 'asciidoctorExtensions'
+    inputs.dir snippetsDir
+}
 
-//bootJar {
-//    dependsOn asciidoctor
-//    copy {
-//        from "./build/docs/asciidoc"
-//        include '*.html'
-//        into "./src/main/resources/static/docs/"
-//    }
-//}
-//
+build {
+    dependsOn asciidoctor
+    copy {
+        from "./build/docs/asciidoc"
+        include '*.html'
+        into "./src/main/resources/static/docs/"
+    }
+}
+
+bootJar {
+    dependsOn asciidoctor
+    copy {
+        from "./build/docs/asciidoc"
+        include '*.html'
+        into "./src/main/resources/static/docs/"
+    }
+}
+
 processResources.dependsOn('ymlSecurity')
 
 task ymlSecurity(type: Copy) {
-    from './src/main/resources/event-submodule-security'
+    from './src/main/resources/submodule-security'
     include '*.yml'
     into './src/main/resources'
 }
