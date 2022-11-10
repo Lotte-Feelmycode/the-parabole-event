@@ -47,13 +47,8 @@ public class EventService {
     /**
      * 이벤트 생성
      */
-    // TODO: JWT 처리 후 userId 처리
-    // TODO: @Valid
     @Transactional
-    public Long createEvent(EventCreateRequestDto eventDto) {
-
-        // 엔티티 조회
-        Long sellerId = eventDto.getUserId();
+    public Long createEvent(Long sellerId, EventCreateRequestDto eventDto) {
 
         // 이벤트-경품정보 생성
         List<EventPrize> eventPrizeList = new ArrayList<>();
@@ -122,8 +117,7 @@ public class EventService {
     /**
      * Seller ID로 이벤트 목록 조회
      */
-    public List<Event> getEventsBySellerId(Long userId) {
-        Long sellerId = userId;
+    public List<Event> getEventsBySellerId(Long sellerId) {
         return eventRepository.findAllBySellerIdAndIsDeleted(sellerId, false);
     }
 

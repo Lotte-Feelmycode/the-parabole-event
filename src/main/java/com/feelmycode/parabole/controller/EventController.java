@@ -30,19 +30,20 @@ public class EventController {
 
     private final EventService eventService;
 
+    // TODO : AWS service
     @PostMapping
     public ResponseEntity<ParaboleResponse> createEvent(
+        @RequestAttribute("sellerId") Long sellerId,
         @RequestBody @Valid EventCreateRequestDto eventDto) {
         Long eventId = -1L;
         try {
-            eventId = eventService.createEvent(eventDto);
+            eventId = eventService.createEvent(sellerId, eventDto);
         } catch (Exception e) {
             throw new ParaboleException(HttpStatus.INTERNAL_SERVER_ERROR, "이벤트 등록 실패");
         }
         return ParaboleResponse.CommonResponse(HttpStatus.CREATED, true, "이벤트 등록 성공", eventId);
     }
 
-    // TODO: 셀러 스토어 정보 리턴값 추가
     @GetMapping("/{eventId}")
     public ResponseEntity<ParaboleResponse> getEvent(@PathVariable("eventId") Long eventId) {
         EventListResponseDto response = eventService.getEventByEventId(eventId);
@@ -79,26 +80,15 @@ public class EventController {
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 검색 리스트 조회 성공", response);
     }
 
-    // TODO: 기존에 heyheya<3 님이 만드신 이벤트 리스트 조회 '원본' API 입니다.
-    @GetMapping("/seller/{userId}")
-    public ResponseEntity<ParaboleResponse> getEventByUserId(@PathVariable("userId") Long userId) {
-        List<EventListResponseDto> response = eventService.getEventListResponseDto(
-            eventService.getEventsBySellerId(userId));
-        return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 리스트 조회 성공", response);
-    }
-
-    // TODO: PR 때 팀원들이 확인하고 merge 이전에 삭제해야할 테스트용 API
-    // TODO: Jwt token이 market -> gateway -> event 이동 후 event server API 에서 인식이 잘 되는지 테스트 하기 위해
-    // 만들었어요. 바로 위에 함수가 해당 테스트 함수로 변경되면 인증과 API 접근이 됩니다.
     @GetMapping("/seller")
-    public ResponseEntity<ParaboleResponse> getEventByUserIdTest(@RequestAttribute Long userId) {
+    public ResponseEntity<ParaboleResponse> getEventBySellerId(@RequestAttribute Long sellerId) {
         List<EventListResponseDto> response = eventService.getEventListResponseDto(
-            eventService.getEventsBySellerId(userId));
+            eventService.getEventsBySellerId(sellerId));
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 리스트 조회 성공", response);
     }
 
     @DeleteMapping("/{eventId}")
-    public ResponseEntity<ParaboleResponse> cancelEvent(@PathVariable("eventId") Long eventId) {
+    public ResponseEntity<ParaboleResponse> cancelEvent(@RequestAttribute("sellerId") Long sellerId, @PathVariable("eventId") Long eventId) {
         try {
             eventService.cancelEvent(eventId);
         } catch (Exception e) {
