@@ -83,15 +83,13 @@ public class EventService {
                     Product product = Product.of(paraboleServiceClient.getProduct(id));
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrize.getStock(), product));
-                    // TODO: 마켓 서버 api 구현 필요
-                    // paraboleServiceClient.setProductRemains(product.getId(), eventPrize.getStock());
+                     paraboleServiceClient.setProductRemains(product.getId(), -1 * (eventPrize.getStock()));
                 } else {
                     // TODO: coupon null exception 처리
                     Coupon coupon = Coupon.of(paraboleServiceClient.getCoupon(id));
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrize.getStock(), coupon));
-                    // TODO: 마켓 서버 api 구현 필요
-                    // paraboleServiceClient.setCouponRemains(coupon.getId(), eventPrize.getStock());
+                     paraboleServiceClient.setCouponRemains(coupon.getId(), -1 * (eventPrize.getStock()));
                 }
             }
         }
