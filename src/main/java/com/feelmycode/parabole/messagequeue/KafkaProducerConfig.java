@@ -18,10 +18,16 @@ public class KafkaProducerConfig {
     @Bean
     public ProducerFactory<String, String> producerFactory() {
         Map<String, Object> properties = new HashMap<>();
-        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "15.164.129.50:9092");
+        properties.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,
+            "3.35.139.139:9092,43.201.29.30:9092,13.209.80.189:9092"
+        );
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-
+        properties.put(ProducerConfig.BATCH_SIZE_CONFIG,"6000");//기본 batchsize 1
+        properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,true);//중복없는 전송을 위한 처리(멱등성 전송)
+        properties.put(ProducerConfig.ACKS_CONFIG,"all");
+        //properties.put(ProducerConfig.COMPRESSION_TYPE_CONFIG,"Gzip");//메세지 압축방식
+       // properties.put("buffer.memory", 24568545);
         return new DefaultKafkaProducerFactory<>(properties);
     }
 

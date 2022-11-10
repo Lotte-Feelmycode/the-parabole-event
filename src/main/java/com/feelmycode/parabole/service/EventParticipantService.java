@@ -79,7 +79,8 @@ public class EventParticipantService {
             eventApplyDto.getUserId(),
             getEvent(eventApplyDto.getEventId()),
             getEventPrize(eventApplyDto.getEventPrizeId()),
-            LocalDateTime.now());
+            LocalDateTime.now(), eventApplyDto.getUserEmail(), eventApplyDto.getUserName()
+        );
 
         eventParticipantRepository.save(eventApply);
     }
