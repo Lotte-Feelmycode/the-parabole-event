@@ -94,7 +94,7 @@ bootJar {
 processResources.dependsOn('ymlSecurity')
 
 task ymlSecurity(type: Copy) {
-    from './src/main/resources/submodule-security'
+    from './src/main/resources/event-submodule-security'
     include '*.yml'
     into './src/main/resources'
 }
