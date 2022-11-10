@@ -35,7 +35,6 @@ public class EventService {
     private final EventRepository eventRepository;
     private final ParaboleServiceClient paraboleServiceClient;
     private final EventPrizeRepository eventPrizeRepository;
-
     private final EventParticipantService eventParticipantService;
 
     public List<EventListResponseDto> getEventListResponseDto(List<Event> eventEntities) {
@@ -44,13 +43,28 @@ public class EventService {
             .collect(Collectors.toList());
     }
 
+    private EventPrizeDto productPrize(EventPrize eventPrize) {
+        ProductResponseDto product = paraboleServiceClient.getProduct(eventPrize.getProductId());
+
+        return new EventPrizeDto(eventPrize.getId(), eventPrize.getPrizeType(),
+            eventPrize.getStock(),
+            product.getProductId(), product.getProductName(), product.getProductImg());
+    }
+
+    private EventPrizeDto couponPrize(EventPrize eventPrize) {
+        CouponDto coupon = paraboleServiceClient.getCoupon(eventPrize.getCouponId());
+
+        return new EventPrizeDto(eventPrize.getId(), eventPrize.getPrizeType(),
+            eventPrize.getStock(), coupon.getCouponId(), coupon.getCouponDetail(),
+            coupon.getCouponDiscountValue(), coupon.getExpiresAt());
+    }
+
     /**
      * 이벤트 생성
      */
     @Transactional
     public Long createEvent(Long sellerId, EventCreateRequestDto eventDto) {
 
-        // 이벤트-경품정보 생성
         List<EventPrize> eventPrizeList = new ArrayList<>();
 
         List<EventPrizeCreateRequestDto> eventPrizeParams = eventDto.getEventPrizeCreateRequestDtos();
@@ -59,14 +73,19 @@ public class EventService {
             for (EventPrizeCreateRequestDto eventPrizeParam : eventPrizeParams) {
                 String prizeType = eventPrizeParam.getType();
                 Long id = eventPrizeParam.getId();
+
                 if (prizeType.equals("PRODUCT")) {
+                    // TODO: product null exception
+                    Long productId = paraboleServiceClient.getProduct(id).getProductId();
                     eventPrizeList.add(
-                        new EventPrize(prizeType, eventPrizeParam.getStock(),
-                            paraboleServiceClient.getProduct(id).getProductId()));
+                        new EventPrize(prizeType, eventPrizeParam.getStock(), productId));
+                    paraboleServiceClient.setProductRemains(productId, eventPrizeParam.getStock());
                 } else {
+                    // TODO: coupon null exception
+                    Long couponId = paraboleServiceClient.getCoupon(id).getCouponId();
                     eventPrizeList.add(
-                        new EventPrize(prizeType, eventPrizeParam.getStock(),
-                            paraboleServiceClient.getCoupon(id).getCouponId()));
+                        new EventPrize(prizeType, eventPrizeParam.getStock(), couponId));
+                    paraboleServiceClient.setCouponRemains(couponId, eventPrizeParam.getStock());
                 }
             }
         }
@@ -90,29 +109,21 @@ public class EventService {
     public EventListResponseDto getEventByEventId(Long eventId) {
         Event event = eventRepository.findById(eventId)
             .orElseThrow(() -> new ParaboleException(HttpStatus.NOT_FOUND, "해당하는 ID의 이벤트가 없습니다"));
-        List<EventPrize> eventPrize = eventPrizeRepository.findByEventId(eventId);
+
+        List<EventPrize> eventPrizes = eventPrizeRepository.findByEventId(eventId);
         List<EventPrizeDto> eventPrizeDtos = new ArrayList<>();
-        for (EventPrize eventPrizes : eventPrize) {
-            System.out.println(eventPrizes.getId() + " " + eventPrizes.getPrizeType());
-            if (eventPrizes.getPrizeType().equals("PRODUCT")) {
-                ProductResponseDto productResponseDto = paraboleServiceClient.getProduct(
-                    eventPrizes.getProductId());
-                eventPrizeDtos.add(
-                    new EventPrizeDto(eventPrizes.getId(), eventPrizes.getPrizeType(),
-                        eventPrizes.getStock(),
-                        productResponseDto.getProductId(), productResponseDto.getProductName(),
-                        productResponseDto.getProductImg()));
-            } else if (eventPrizes.getPrizeType().equals("COUPON")) {
-                CouponDto couponDto = paraboleServiceClient.getCoupon(eventPrizes.getCouponId());
-                eventPrizeDtos.add(
-                    new EventPrizeDto(eventPrizes.getId(), eventPrizes.getPrizeType(),
-                        eventPrizes.getStock(), couponDto.getCouponId(),
-                        couponDto.getCouponDetail(), couponDto.getCouponDiscountValue(),
-                        couponDto.getExpiresAt()));
+
+        eventPrizes.forEach(e -> {
+            if (e.getPrizeType().equals("PRODUCT")) {
+                eventPrizeDtos.add(productPrize(e));
+            } else if (e.getPrizeType().equals("COUPON")) {
+                eventPrizeDtos.add(couponPrize(e));
             }
-        }
+        });
+
         return new EventListResponseDto(event, eventPrizeDtos);
     }
+
 
     /**
      * Seller ID로 이벤트 목록 조회
@@ -208,6 +219,13 @@ public class EventService {
             .orElseThrow(() -> new ParaboleException(HttpStatus.NOT_FOUND, "해당 이벤트가 존재하지 않습니다."));
         try {
             event.cancel();
+            event.getEventPrizes().forEach(e -> {
+                if (e.getPrizeType().equals("PRODUCT")) {
+                    paraboleServiceClient.setProductRemains(e.getProductId(), -1 * (e.getStock()));
+                } else if (e.getPrizeType().equals("COUPON")) {
+                    paraboleServiceClient.setCouponRemains(e.getCouponId(), -1 * (e.getStock()));
+                }
+            });
             eventRepository.save(event);
         } catch (Exception e) {
             throw new ParaboleException(HttpStatus.INTERNAL_SERVER_ERROR, "이벤트 등록 실패");
