@@ -3,7 +3,7 @@ PROJECT_NAME="The Parabole"
 TODAY=$(date +"%Y%m%d")
 
 DEPLOY_PATH=/home/ubuntu
-DEPLOY_JAR=the-parabole-event-01-dev-0.0.1-SNAPSHOT.jar
+DEPLOY_JAR=the-parabole-event-0.0.1-SNAPSHOT.jar
 DEPLOY_FILE=$DEPLOY_PATH/$DEPLOY_JAR
 
 LOG_PATH=$DEPLOY_PATH/log
