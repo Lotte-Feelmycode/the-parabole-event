@@ -17,6 +17,7 @@ import com.feelmycode.parabole.repository.EventRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -157,10 +158,47 @@ public class EventService {
      * 이벤트 전체 조회 (삭제된 이벤트 제외)
      */
     public List<Event> getEventsAllNotDeleted() {
-        return eventRepository.findAllByIsDeleted(false);
+        return eventRepository.findAllByIsDeletedOOrderByStartAtDesc(false);
     }
 
-    // TODO : 이벤트 수정
+    /**
+     * 이벤트 조회 (셀러 오피스 이벤트 목록 조회용)
+     */
+    public List<EventSearchResponseDto> getEventsMonthAfter() {
+        LocalDateTime nowDate = LocalDateTime.now();
+        LocalDateTime monthAfterDate = nowDate.plusMonths(1L);
+        return eventRepository.findAllByStartAtBetweenAndIsDeleted(nowDate,
+                monthAfterDate, false)
+            .stream()
+            .filter(event -> event.getType().equals("FCFS"))
+            .sorted(Comparator.comparing(Event::getStartAt))
+            .map(EventSearchResponseDto::new)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 이벤트 등록 가능 여부 체크
+     */
+    public Boolean canCreateEvent(Long sellerId, String dateParam) {
+        LocalDateTime inputDtm = LocalDateTime.parse(dateParam);
+        eventRepository.findAllByStartAtBetweenAndIsDeleted(inputDtm, inputDtm.plusMinutes(50), false)
+            .stream().filter(event -> event.getType().equals("FCFS"))
+            .findAny().ifPresent(event -> {
+                throw new ParaboleException(HttpStatus.ALREADY_REPORTED,
+                    "선택하신 시간에 이미 등록된 이벤트가 있습니다.");
+            });
+
+        int dayOfWeek = inputDtm.getDayOfWeek().getValue();
+        eventRepository.findAllByStartAtBetweenAndIsDeleted(inputDtm.minusDays(dayOfWeek),
+                inputDtm.plusDays(6 - dayOfWeek), false)
+            .stream()
+            .filter(event -> event.getSellerId().equals(sellerId) && event.getType().equals("FCFS"))
+            .findAny().ifPresent(event -> {
+                throw new ParaboleException(HttpStatus.ALREADY_REPORTED,
+                    "선착순 이벤트는 일주일에 하나만 등록 가능합니다.");
+            });
+        return true;
+    }
 
     /**
      * 이벤트 취소

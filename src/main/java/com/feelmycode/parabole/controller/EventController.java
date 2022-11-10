@@ -36,6 +36,9 @@ public class EventController {
         @RequestAttribute("sellerId") Long sellerId,
         @RequestBody @Valid EventCreateRequestDto eventDto) {
         Long eventId = -1L;
+        if (!eventService.canCreateEvent(sellerId, eventDto.getStartAt().toString())) {
+            throw new ParaboleException(HttpStatus.ALREADY_REPORTED, "이벤트 등록 실패");
+        }
         try {
             eventId = eventService.createEvent(sellerId, eventDto);
         } catch (Exception e) {
@@ -51,7 +54,6 @@ public class EventController {
             response);
     }
 
-    // TODO: 조회조건+정렬조건 추가
     @GetMapping
     public ResponseEntity<ParaboleResponse> getEvent() {
         List<EventListResponseDto> response = eventService.getEventListResponseDto(
@@ -85,6 +87,22 @@ public class EventController {
         List<EventListResponseDto> response = eventService.getEventListResponseDto(
             eventService.getEventsBySellerId(sellerId));
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 리스트 조회 성공", response);
+    }
+
+    @GetMapping("/seller/scheduler")
+    public ResponseEntity<ParaboleResponse> getEventScheduler() {
+        List<EventSearchResponseDto> response = eventService.getEventsMonthAfter();
+        return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 스케쥴러 조회 성공", response);
+    }
+
+    @GetMapping("/seller/check")
+    public ResponseEntity<ParaboleResponse> showIsAvailable(
+        @RequestAttribute("sellerId") Long sellerId, @RequestParam("inputDtm") String inputDate) {
+        if (!eventService.canCreateEvent(sellerId, inputDate)) {
+            return ParaboleResponse.CommonResponse(HttpStatus.ALREADY_REPORTED, true, "이벤트 등록 가능", false);
+        } else {
+            return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 등록 가능", true);
+        }
     }
 
     @DeleteMapping("/{eventId}")
