@@ -42,8 +42,8 @@ public class kafkaConsumer {
             ex.printStackTrace();
         }
         EventApplyDto applyDto = new EventApplyDto(ObjectToLong(map.get("userId")),
-            ObjectToLong(map.get("eventId")), ObjectToLong(map.get("eventPrizeId")));
-
+        ObjectToLong(map.get("eventId")), ObjectToLong(map.get("eventPrizeId")),
+            String.valueOf(map.get("userEmail")), String.valueOf(map.get("userName")));
         eventParticipantService.eventJoin(applyDto);
     }
 

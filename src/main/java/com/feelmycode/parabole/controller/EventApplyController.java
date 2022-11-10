@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,17 +30,19 @@ public class EventApplyController {
 
     @PostMapping("/participant")
     public ResponseEntity<ParaboleResponse> insertEventApply(
-        @RequestBody EventApplyDto dto) {
-
-        eventParticipantService.applyCheck(dto);
-        kafkaProducer.send("v10-event-topic", dto);
-
+        @RequestBody EventApplyDto dto, @RequestAttribute Long userId,
+        @RequestAttribute String email, @RequestAttribute String username) {
+        EventApplyDto responseDto = new EventApplyDto(userId, dto.getEventId(),
+            dto.getEventPrizeId(), email, username);
+        eventParticipantService.applyCheck(responseDto);
+        kafkaProducer.send("v10-event-topic", responseDto);
         return ParaboleResponse.CommonResponse(HttpStatus.CREATED, true, "응모가 완료 되었습니다");
     }
 
     @PostMapping("/participant/check")
     public ResponseEntity<ParaboleResponse> eventApplyCheck(
-        @RequestBody RequestEventApplyCheckDto dto) {
+        @RequestBody RequestEventApplyCheckDto dto, @RequestAttribute Long userId) {
+        dto.setUserId(userId);
         if (!eventParticipantService.eventApplyCheck(dto)) {
             return ParaboleResponse.CommonResponse(HttpStatus.ALREADY_REPORTED, true,
                 dto.getEventId() + "번 이벤트에 이미 응모하였습니다", false);
@@ -54,8 +57,9 @@ public class EventApplyController {
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 응모 리스트 조회 성공", response);
     }
 
-    @GetMapping("/user/participant/{userId}")
-    public ResponseEntity<ParaboleResponse> getUserEventParticipants(@PathVariable Long userId) {
+    @GetMapping("/user/participant")
+    public ResponseEntity<ParaboleResponse> getUserEventParticipants(
+        @RequestAttribute Long userId) {
         List<EventParticipantUserDto> response = eventParticipantService.getEventParticipantUser(
             userId);
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "유저 이벤트 응모 리스트 조회 성공",
