@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -78,8 +79,19 @@ public class EventController {
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 검색 리스트 조회 성공", response);
     }
 
+    // TODO: 기존에 heyheya<3 님이 만드신 이벤트 리스트 조회 '원본' API 입니다.
     @GetMapping("/seller/{userId}")
     public ResponseEntity<ParaboleResponse> getEventByUserId(@PathVariable("userId") Long userId) {
+        List<EventListResponseDto> response = eventService.getEventListResponseDto(
+            eventService.getEventsBySellerId(userId));
+        return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 리스트 조회 성공", response);
+    }
+
+    // TODO: PR 때 팀원들이 확인하고 merge 이전에 삭제해야할 테스트용 API
+    // TODO: Jwt token이 market -> gateway -> event 이동 후 event server API 에서 인식이 잘 되는지 테스트 하기 위해
+    // 만들었어요. 바로 위에 함수가 해당 테스트 함수로 변경되면 인증과 API 접근이 됩니다.
+    @GetMapping("/seller")
+    public ResponseEntity<ParaboleResponse> getEventByUserIdTest(@RequestAttribute Long userId) {
         List<EventListResponseDto> response = eventService.getEventListResponseDto(
             eventService.getEventsBySellerId(userId));
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 리스트 조회 성공", response);
