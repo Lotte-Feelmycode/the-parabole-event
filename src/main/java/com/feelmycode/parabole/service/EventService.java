@@ -2,8 +2,10 @@ package com.feelmycode.parabole.service;
 
 
 import com.feelmycode.parabole.client.ParaboleServiceClient;
+import com.feelmycode.parabole.domain.Coupon;
 import com.feelmycode.parabole.domain.Event;
 import com.feelmycode.parabole.domain.EventPrize;
+import com.feelmycode.parabole.domain.Product;
 import com.feelmycode.parabole.dto.CouponDto;
 import com.feelmycode.parabole.dto.EventCreateRequestDto;
 import com.feelmycode.parabole.dto.EventListResponseDto;
@@ -44,19 +46,21 @@ public class EventService {
     }
 
     private EventPrizeDto productPrize(EventPrize eventPrize) {
-        ProductResponseDto product = paraboleServiceClient.getProduct(eventPrize.getProductId());
+        ProductResponseDto product = paraboleServiceClient.getProduct(
+            eventPrize.getProduct().getId());
 
         return new EventPrizeDto(eventPrize.getId(), eventPrize.getPrizeType(),
-            eventPrize.getStock(),
-            product.getProductId(), product.getProductName(), product.getProductImg());
+            eventPrize.getStock(), product.getProductId(), product.getProductName(),
+            product.getProductImg());
     }
 
     private EventPrizeDto couponPrize(EventPrize eventPrize) {
-        CouponDto coupon = paraboleServiceClient.getCoupon(eventPrize.getCouponId());
+        CouponDto coupon = paraboleServiceClient.getCoupon(eventPrize.getCoupon().getId());
 
         return new EventPrizeDto(eventPrize.getId(), eventPrize.getPrizeType(),
-            eventPrize.getStock(), coupon.getCouponId(), coupon.getCouponDetail(),
-            coupon.getCouponDiscountValue(), coupon.getExpiresAt());
+            eventPrize.getStock(), coupon.getCouponId(), coupon.getCouponName(),
+            coupon.getCouponType(), coupon.getCouponDetail(), coupon.getCouponDiscountValue(),
+            coupon.getExpiresAt());
     }
 
     /**
@@ -67,25 +71,27 @@ public class EventService {
 
         List<EventPrize> eventPrizeList = new ArrayList<>();
 
-        List<EventPrizeCreateRequestDto> eventPrizeParams = eventDto.getEventPrizeCreateRequestDtos();
+        List<EventPrizeCreateRequestDto> eventPrizeDtos = eventDto.getEventPrizeCreateRequestDtos();
 
-        if (!CollectionUtils.isEmpty(eventPrizeParams)) {
-            for (EventPrizeCreateRequestDto eventPrizeParam : eventPrizeParams) {
-                String prizeType = eventPrizeParam.getType();
-                Long id = eventPrizeParam.getId();
+        if (!CollectionUtils.isEmpty(eventPrizeDtos)) {
+            for (EventPrizeCreateRequestDto eventPrize : eventPrizeDtos) {
+                String prizeType = eventPrize.getType();
+                Long id = eventPrize.getId();
 
                 if (prizeType.equals("PRODUCT")) {
-                    // TODO: product null exception
-                    Long productId = paraboleServiceClient.getProduct(id).getProductId();
+                    // TODO: product null exception 처리
+                    Product product = Product.of(paraboleServiceClient.getProduct(id));
                     eventPrizeList.add(
-                        new EventPrize(prizeType, eventPrizeParam.getStock(), productId));
-                    paraboleServiceClient.setProductRemains(productId, eventPrizeParam.getStock());
+                        new EventPrize(prizeType, eventPrize.getStock(), product));
+                    // TODO: 마켓 서버 api 구현 필요
+                    // paraboleServiceClient.setProductRemains(product.getId(), eventPrize.getStock());
                 } else {
-                    // TODO: coupon null exception
-                    Long couponId = paraboleServiceClient.getCoupon(id).getCouponId();
+                    // TODO: coupon null exception 처리
+                    Coupon coupon = Coupon.of(paraboleServiceClient.getCoupon(id));
                     eventPrizeList.add(
-                        new EventPrize(prizeType, eventPrizeParam.getStock(), couponId));
-                    paraboleServiceClient.setCouponRemains(couponId, eventPrizeParam.getStock());
+                        new EventPrize(prizeType, eventPrize.getStock(), coupon));
+                    // TODO: 마켓 서버 api 구현 필요
+                    // paraboleServiceClient.setCouponRemains(coupon.getId(), eventPrize.getStock());
                 }
             }
         }
@@ -144,7 +150,7 @@ public class EventService {
             eventType.equals("") ? Arrays.asList("RAFFLE", "FCFS") : Arrays.asList(eventType);
         List<Integer> statuses =
             eventStatus < 0 ? Arrays.asList(0, 1, 2) : Arrays.asList(eventStatus);
-        
+
         if (dateDiv > -1) {
             eventList = dateDiv < 1
                 ? eventRepository.findAllByStartAtBetweenAndIsDeleted(fromDateTime, toDateTime,
@@ -191,7 +197,8 @@ public class EventService {
      */
     public Boolean canCreateEvent(Long sellerId, String dateParam) {
         LocalDateTime inputDtm = LocalDateTime.parse(dateParam);
-        eventRepository.findAllByStartAtBetweenAndIsDeleted(inputDtm, inputDtm.plusMinutes(50), false)
+        eventRepository.findAllByStartAtBetweenAndIsDeleted(inputDtm, inputDtm.plusMinutes(50),
+                false)
             .stream().filter(event -> event.getType().equals("FCFS"))
             .findAny().ifPresent(event -> {
                 throw new ParaboleException(HttpStatus.ALREADY_REPORTED,
@@ -221,9 +228,9 @@ public class EventService {
             event.cancel();
             event.getEventPrizes().forEach(e -> {
                 if (e.getPrizeType().equals("PRODUCT")) {
-                    paraboleServiceClient.setProductRemains(e.getProductId(), -1 * (e.getStock()));
+                    paraboleServiceClient.setCouponRemains(e.getId(), e.getStock());
                 } else if (e.getPrizeType().equals("COUPON")) {
-                    paraboleServiceClient.setCouponRemains(e.getCouponId(), -1 * (e.getStock()));
+                    paraboleServiceClient.setCouponRemains(e.getId(), e.getStock());
                 }
             });
             eventRepository.save(event);
