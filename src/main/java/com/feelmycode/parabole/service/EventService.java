@@ -1,7 +1,7 @@
 package com.feelmycode.parabole.service;
 
 
-import com.feelmycode.parabole.client.ProductServiceClient;
+import com.feelmycode.parabole.client.ParaboleServiceClient;
 import com.feelmycode.parabole.domain.Event;
 import com.feelmycode.parabole.domain.EventPrize;
 import com.feelmycode.parabole.dto.CouponDto;
@@ -26,7 +26,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 @Service
 @Slf4j
@@ -34,7 +33,7 @@ import org.springframework.util.StringUtils;
 public class EventService {
 
     private final EventRepository eventRepository;
-    private final ProductServiceClient ProductServiceClient;
+    private final ParaboleServiceClient paraboleServiceClient;
     private final EventPrizeRepository eventPrizeRepository;
 
     private final EventParticipantService eventParticipantService;
@@ -63,11 +62,11 @@ public class EventService {
                 if (prizeType.equals("PRODUCT")) {
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrizeParam.getStock(),
-                            ProductServiceClient.getProduct(id).getProductId()));
+                            paraboleServiceClient.getProduct(id).getProductId()));
                 } else {
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrizeParam.getStock(),
-                            ProductServiceClient.getCouponData(id).getCouponId()));
+                            paraboleServiceClient.getCouponData(id).getCouponId()));
                 }
             }
         }
@@ -96,7 +95,7 @@ public class EventService {
         for (EventPrize eventPrizes : eventPrize) {
             System.out.println(eventPrizes.getId() + " " + eventPrizes.getPrizeType());
             if (eventPrizes.getPrizeType().equals("PRODUCT")) {
-                ProductResponseDto productResponseDto = ProductServiceClient.getProduct(
+                ProductResponseDto productResponseDto = paraboleServiceClient.getProduct(
                     eventPrizes.getProductId());
                 eventPrizeDtos.add(
                     new EventPrizeDto(eventPrizes.getId(), eventPrizes.getPrizeType(),
@@ -104,7 +103,7 @@ public class EventService {
                         productResponseDto.getProductId(), productResponseDto.getProductName(),
                         productResponseDto.getProductImg()));
             } else if (eventPrizes.getPrizeType().equals("COUPON")) {
-                CouponDto couponDto = ProductServiceClient.getCouponData(eventPrizes.getCouponId());
+                CouponDto couponDto = paraboleServiceClient.getCouponData(eventPrizes.getCouponId());
                 eventPrizeDtos.add(
                     new EventPrizeDto(eventPrizes.getId(), eventPrizes.getPrizeType(),
                         eventPrizes.getStock(), couponDto.getCouponId(),
