@@ -13,5 +13,5 @@ public interface ParaboleServiceClient {
     ProductResponseDto getProduct(@RequestParam("productId") Long productId);
 
     @GetMapping("/api/v1/coupon/data")
-    CouponDto getCouponData(@RequestParam("couponId") Long couponId);
+    CouponDto getCoupon(@RequestParam("couponId") Long couponId);
 }

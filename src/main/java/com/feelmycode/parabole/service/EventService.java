@@ -66,7 +66,7 @@ public class EventService {
                 } else {
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrizeParam.getStock(),
-                            paraboleServiceClient.getCouponData(id).getCouponId()));
+                            paraboleServiceClient.getCoupon(id).getCouponId()));
                 }
             }
         }
@@ -103,7 +103,7 @@ public class EventService {
                         productResponseDto.getProductId(), productResponseDto.getProductName(),
                         productResponseDto.getProductImg()));
             } else if (eventPrizes.getPrizeType().equals("COUPON")) {
-                CouponDto couponDto = paraboleServiceClient.getCouponData(eventPrizes.getCouponId());
+                CouponDto couponDto = paraboleServiceClient.getCoupon(eventPrizes.getCouponId());
                 eventPrizeDtos.add(
                     new EventPrizeDto(eventPrizes.getId(), eventPrizes.getPrizeType(),
                         eventPrizes.getStock(), couponDto.getCouponId(),
