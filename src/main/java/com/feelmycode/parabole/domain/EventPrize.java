@@ -2,6 +2,7 @@ package com.feelmycode.parabole.domain;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import javax.persistence.Column;
+import javax.persistence.Embedded;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -33,11 +34,17 @@ public class EventPrize {
 
     private Integer stock;
 
-    private Long couponId;
+    @Embedded
+    private Product product;
 
-    private Long productId;
+    @Embedded
+    private Coupon coupon;
 
-    private String prizeName;
+//    private Long couponId;
+//
+//    private Long productId;
+//
+//    private String prizeName;
 
     public void setEvent(Event event) {
         this.event = event;
@@ -48,16 +55,17 @@ public class EventPrize {
     }
 
     @Builder
-    public EventPrize(String prizeType, Integer stock, Long prizeId, String prizeName) {
+    public EventPrize(String prizeType, Integer stock, Product product) {
         this.prizeType = prizeType;
         this.stock = stock;
-        if (prizeType.equals("PRODUCT")) {
-            this.productId = prizeId;
-        } else if (prizeType.equals("COUPON")) {
-            this.couponId = prizeId;
-        }
-        this.prizeName = prizeName;
+        this.product = product;
     }
 
+    @Builder
+    public EventPrize(String prizeType, Integer stock, Coupon coupon) {
+        this.prizeType = prizeType;
+        this.stock = stock;
+        this.coupon = coupon;
+    }
 }
 

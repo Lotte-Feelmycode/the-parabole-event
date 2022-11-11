@@ -18,10 +18,13 @@ public class EventWinnerDto {
 
     private String userEmail;
 
-    public EventWinnerDto(EventWinner eventWinner){
+    public EventWinnerDto(EventWinner eventWinner) {
         this.eventWinnerId = eventWinner.getId();
         this.eventTitle = eventWinner.getEvent().getTitle();
-        this.prizeName = eventWinner.getEventParticipant().getEventPrize().getPrizeName();
+        // TODO : 리팩토링 필수
+        this.prizeName = eventWinner.getEventPrize().getPrizeType().equals("PRODUCT")
+            ? eventWinner.getEventParticipant().getEventPrize().getProduct().getName()
+            : eventWinner.getEventParticipant().getEventPrize().getCoupon().getName();
         this.userEmail = eventWinner.getEventParticipant().getUserEmail();
     }
 }
