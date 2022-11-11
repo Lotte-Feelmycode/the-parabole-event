@@ -18,18 +18,16 @@ public class EventApplyDto {
     private Long eventId;
     @NotNull
     private Long eventPrizeId;
-    private LocalDateTime participantAt;
 
     private String userEmail;
 
     private String userName;
 
-    public EventApplyDto(Long userId, Long eventId, Long eventPrizeId,
-        LocalDateTime participantAt, String userEmail, String userName) {
+    public EventApplyDto(Long userId, Long eventId, Long eventPrizeId, String userEmail,
+        String userName) {
         this.userId = userId;
         this.eventId = eventId;
         this.eventPrizeId = eventPrizeId;
-        this.participantAt = participantAt;
         this.userEmail = userEmail;
         this.userName = userName;
     }
@@ -42,6 +40,7 @@ public class EventApplyDto {
 
     public EventParticipant toEntity(Long userId, Event event, EventPrize eventPrize,
         LocalDateTime eventTimeStartAt, String userEmail, String userName) {
-        return new EventParticipant(userId, event, eventPrize, eventTimeStartAt, userEmail, userName);
+        return new EventParticipant(userId, event, eventPrize, eventTimeStartAt, userEmail,
+            userName);
     }
 }
