@@ -57,8 +57,10 @@ public class EventParticipantService {
                 EventWinner eventWinner = eventWinnerRepository.findByUserIdAndEventId(userId,
                     eventParticipant.getEvent().getId());
                 if (eventWinner != null) {
+                    EventPrize eventPrize = eventWinner.getEventPrize();
                     eventParticipantUserDto.setPrizeName(
-                        eventWinner.getEventPrize().getPrizeName());
+                        eventPrize.getPrizeType().equals("PRODUCT") ? eventPrize.getProduct()
+                            .getName() : eventPrize.getCoupon().getName());
                     eventParticipantUserDto.setWinnerStatus("당첨");
                     result.add(eventParticipantUserDto);
                 } else {
