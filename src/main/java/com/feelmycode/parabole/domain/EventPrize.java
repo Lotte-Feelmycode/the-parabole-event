@@ -48,7 +48,7 @@ public class EventPrize {
     }
 
     @Builder
-    public EventPrize(String prizeType, Integer stock, Long prizeId) {
+    public EventPrize(String prizeType, Integer stock, Long prizeId, String prizeName) {
         this.prizeType = prizeType;
         this.stock = stock;
         if (prizeType.equals("PRODUCT")) {
@@ -56,6 +56,7 @@ public class EventPrize {
         } else if (prizeType.equals("COUPON")) {
             this.couponId = prizeId;
         }
+        this.prizeName = prizeName;
     }
 
 }
