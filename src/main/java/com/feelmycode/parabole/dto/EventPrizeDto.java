@@ -51,4 +51,21 @@ public class EventPrizeDto {
         this.expiresAt = expiresAt;
     }
 
+    static public EventPrizeDto toProductDto(EventPrize eventPrize) {
+        return new EventPrizeDto(
+            eventPrize.getId(), eventPrize.getPrizeType(), eventPrize.getStock(),
+            eventPrize.getProduct().getId(), eventPrize.getProduct().getName(),
+            eventPrize.getProduct().getThumbnailImg()
+        );
+    }
+
+    static public EventPrizeDto toCouponDto(EventPrize eventPrize) {
+        return new EventPrizeDto(
+            eventPrize.getId(), eventPrize.getPrizeType(), eventPrize.getStock(),
+            eventPrize.getCoupon().getId(), eventPrize.getCoupon().getName(),
+            eventPrize.getCoupon().getType(), eventPrize.getCoupon().getDetail(),
+            eventPrize.getCoupon().getDiscountValue(), eventPrize.getCoupon().getExpiresAt()
+        );
+    }
+
 }

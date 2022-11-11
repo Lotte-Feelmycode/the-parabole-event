@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(name = "parabole")
 public interface ParaboleServiceClient {
 
+    @GetMapping("/api/v1/health")
+    Boolean healthCheck();
+
     @GetMapping("/api/v1/product/data")
     ProductResponseDto getProduct(@RequestParam("productId") Long productId);
 
@@ -24,4 +27,6 @@ public interface ParaboleServiceClient {
     @PatchMapping("/api/v1/coupon/{couponId}/stock/{stock}")
     Boolean setCouponRemains(@PathVariable("couponId") Long couponId,
         @PathVariable("stock") Integer stock);
+
+
 }

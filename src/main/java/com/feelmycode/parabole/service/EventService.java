@@ -69,10 +69,15 @@ public class EventService {
     @Transactional
     public Long createEvent(Long sellerId, EventCreateRequestDto eventDto) {
 
+        log.info(eventDto.toString());
+
         List<EventPrize> eventPrizeList = new ArrayList<>();
 
         List<EventPrizeCreateRequestDto> eventPrizeDtos = eventDto.getEventPrizeCreateRequestDtos();
 
+
+        // api > 마켓 / 이벤트
+        // 이벤트 > 페인클라이언트 > 마켓 (X)
         if (!CollectionUtils.isEmpty(eventPrizeDtos)) {
             for (EventPrizeCreateRequestDto eventPrize : eventPrizeDtos) {
                 String prizeType = eventPrize.getType();
@@ -119,9 +124,9 @@ public class EventService {
 
         eventPrizes.forEach(e -> {
             if (e.getPrizeType().equals("PRODUCT")) {
-                eventPrizeDtos.add(productPrize(e));
+                eventPrizeDtos.add(EventPrizeDto.toProductDto(e));
             } else if (e.getPrizeType().equals("COUPON")) {
-                eventPrizeDtos.add(couponPrize(e));
+                eventPrizeDtos.add(EventPrizeDto.toCouponDto(e));
             }
         });
 
