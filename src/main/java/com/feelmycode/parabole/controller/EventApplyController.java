@@ -44,7 +44,7 @@ public class EventApplyController {
         @RequestBody RequestEventApplyCheckDto dto, @RequestAttribute Long userId) {
         dto.setUserId(userId);
         if (!eventParticipantService.eventApplyCheck(dto)) {
-            return ParaboleResponse.CommonResponse(HttpStatus.ALREADY_REPORTED, true,
+            return ParaboleResponse.CommonResponse(HttpStatus.BAD_REQUEST, true,
                 dto.getEventId() + "번 이벤트에 이미 응모하였습니다", false);
         }
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true,
