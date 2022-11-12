@@ -3,6 +3,7 @@ package com.feelmycode.parabole.messagequeue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.feelmycode.parabole.dto.EventApplyDto;
+import com.feelmycode.parabole.dto.EventApplyTestDto;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -32,6 +33,21 @@ public class KafkaProducer {
         log.info("kafka Producer send data from eventservice" + eventApplyDto);
 
         return eventApplyDto;
+    }
+
+    public EventApplyTestDto sendTest(String topic, EventApplyTestDto eventApplyTestDto) {
+        ObjectMapper mapper = new ObjectMapper();
+        String jsonInString = "";
+        try {
+            jsonInString = mapper.writeValueAsString(eventApplyTestDto);
+        } catch (JsonProcessingException ex) {
+            ex.printStackTrace();
+        }
+
+        kafkaTemplate.send(topic, jsonInString);
+        log.info("kafka Producer send data from eventservice" + eventApplyTestDto);
+
+        return eventApplyTestDto;
     }
 
 

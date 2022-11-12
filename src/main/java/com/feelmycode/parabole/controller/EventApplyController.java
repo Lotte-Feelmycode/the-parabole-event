@@ -1,6 +1,7 @@
 package com.feelmycode.parabole.controller;
 
 import com.feelmycode.parabole.dto.EventApplyDto;
+import com.feelmycode.parabole.dto.EventApplyTestDto;
 import com.feelmycode.parabole.dto.EventParticipantDto;
 import com.feelmycode.parabole.dto.EventParticipantUserDto;
 import com.feelmycode.parabole.dto.RequestEventApplyCheckDto;
@@ -36,6 +37,13 @@ public class EventApplyController {
             dto.getEventPrizeId(), email, username);
         eventParticipantService.applyCheck(responseDto);
         kafkaProducer.send("v10-event-topic", responseDto);
+        return ParaboleResponse.CommonResponse(HttpStatus.CREATED, true, "응모가 완료 되었습니다");
+    }
+    
+    @PostMapping("participant/test")
+    public ResponseEntity<ParaboleResponse> insertEventApplyTest(@RequestBody EventApplyTestDto dto){
+        eventParticipantService.applyCheckTest(dto);
+        kafkaProducer.sendTest("v10-event-topic", dto);
         return ParaboleResponse.CommonResponse(HttpStatus.CREATED, true, "응모가 완료 되었습니다");
     }
 

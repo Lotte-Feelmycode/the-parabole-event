@@ -4,6 +4,7 @@ import com.feelmycode.parabole.domain.Event;
 import com.feelmycode.parabole.domain.EventParticipant;
 import com.feelmycode.parabole.domain.EventWinner;
 import com.feelmycode.parabole.dto.EventApplyDto;
+import com.feelmycode.parabole.dto.EventApplyTestDto;
 import com.feelmycode.parabole.global.error.exception.ParaboleException;
 import com.feelmycode.parabole.repository.EventParticipantRepository;
 import com.feelmycode.parabole.domain.EventPrize;
@@ -157,6 +158,14 @@ public class EventParticipantService {
     public void applyCheck(EventApplyDto eventApplyDto) {
         EventParticipant eventParticipant = eventParticipantRepository.findByUserIdAndEventId(
             eventApplyDto.getUserId(), eventApplyDto.getEventId());
+        if (eventParticipant != null) {
+            throw new ParaboleException(HttpStatus.ALREADY_REPORTED, "이미 응모 완료 되었습니다");
+        }
+    }
+
+    public void applyCheckTest(EventApplyTestDto eventApplyTestDto) {
+        EventParticipant eventParticipant = eventParticipantRepository.findByUserIdAndEventId(
+            eventApplyTestDto.getUserId(), eventApplyTestDto.getEventId());
         if (eventParticipant != null) {
             throw new ParaboleException(HttpStatus.ALREADY_REPORTED, "이미 응모 완료 되었습니다");
         }
