@@ -39,7 +39,7 @@ public class EventApplyController {
         kafkaProducer.send("v10-event-topic", responseDto);
         return ParaboleResponse.CommonResponse(HttpStatus.CREATED, true, "응모가 완료 되었습니다");
     }
-    
+
     @PostMapping("participant/test")
     public ResponseEntity<ParaboleResponse> insertEventApplyTest(@RequestBody EventApplyTestDto dto){
         eventParticipantService.applyCheckTest(dto);
