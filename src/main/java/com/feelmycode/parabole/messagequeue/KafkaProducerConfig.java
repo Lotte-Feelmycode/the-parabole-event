@@ -23,11 +23,10 @@ public class KafkaProducerConfig {
         );
         properties.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
         properties.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
-        properties.put(ProducerConfig.BATCH_SIZE_CONFIG,"100000");//기본 batchsize 16384
+        properties.put(ProducerConfig.BATCH_SIZE_CONFIG,"50000");//기본 batchsize 16384
         properties.put(ProducerConfig.ENABLE_IDEMPOTENCE_CONFIG,true);//중복없는 전송을 위한 처리(멱등성 전송)
         properties.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION,2);
         properties.put(ProducerConfig.LINGER_MS_CONFIG,10);
-        properties.put(ProducerConfig.RETRIES_CONFIG,2);
         properties.put(ProducerConfig.ACKS_CONFIG,"all");
         properties.put(ProducerConfig.COMPRESSION_TYPE_CONFIG,"gzip");//메세지 압축방식
 
