@@ -36,14 +36,14 @@ public class EventApplyController {
         EventApplyDto responseDto = new EventApplyDto(userId, dto.getEventId(),
             dto.getEventPrizeId(), email, username);
         eventParticipantService.applyCheck(responseDto);
-        kafkaProducer.send("v11-event-topic", responseDto);
+        kafkaProducer.send("v12-event-topic", responseDto);
         return ParaboleResponse.CommonResponse(HttpStatus.CREATED, true, "응모가 완료 되었습니다");
     }
 
     @PostMapping("/participant/test")
     public ResponseEntity<ParaboleResponse> insertEventApplyTest(@RequestBody EventApplyTestDto dto){
         eventParticipantService.applyCheckTest(dto);
-        kafkaProducer.sendTest("v11-event-topic", dto);
+        kafkaProducer.sendTest("v12-event-topic", dto);
         return ParaboleResponse.CommonResponse(HttpStatus.CREATED, true, "응모가 완료 되었습니다");
     }
 
