@@ -28,7 +28,7 @@ public class KafkaProducerConfig {
         properties.put(ProducerConfig.MAX_IN_FLIGHT_REQUESTS_PER_CONNECTION,2);
         properties.put(ProducerConfig.LINGER_MS_CONFIG,2);
         properties.put(ProducerConfig.ACKS_CONFIG,"all");
-        properties.put(ProducerConfig.COMPRESSION_TYPE_CONFIG,"lz4");//메세지 압축방식
+        properties.put(ProducerConfig.COMPRESSION_TYPE_CONFIG,"gzip");//메세지 압축방식
 
        // properties.put("buffer.memory", 24568545);
         return new DefaultKafkaProducerFactory<>(properties);
