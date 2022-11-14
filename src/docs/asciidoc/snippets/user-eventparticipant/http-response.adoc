@@ -1,16 +1,16 @@
 [source,http,options="nowrap"]
 ----
-HTTP/1.1 201 Created
+HTTP/1.1 200 OK
 Content-Type: application/json
 Transfer-Encoding: chunked
-Date: Mon, 14 Nov 2022 11:17:35 GMT
+Date: Mon, 14 Nov 2022 10:19:16 GMT
 Keep-Alive: timeout=60
 Connection: keep-alive
-Content-Length: 93
+Content-Length: 107
 
 {
   "success" : true,
-  "message" : "응모가 완료 되었습니다",
-  "data" : null
+  "message" : "유저 이벤트 응모 리스트 조회 성공",
+  "data" : [ ]
 }
 ----

@@ -1,0 +1,5 @@
+[source,bash]
+----
+$ curl 'http://parabole.com:60421/api/v1/event/user/participant' -i -X GET \
+    -H 'Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.eyJzZWxsZXJTdG9yZW5hbWUiOiJ1MS1zMSdzIHN0b3JlIiwicm9sZSI6IlJPTEVfU0VMTEVSIiwic2VsbGVySWQiOjEsInBob25lIjoiMDEwNTc3ODUwMjMiLCJuaWNrbmFtZSI6InRlc3QiLCJ1c2VySWQiOjEsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsInVzZXJuYW1lIjoidGVzdCIsImlhdCI6MTY2ODQxMDYwNiwiZXhwIjoxNjY4NDk3MDA2fQ.fyAqUxldrU_cSadbVXFop7DlKQHgri69Lm6l_d1tpho'
+----
