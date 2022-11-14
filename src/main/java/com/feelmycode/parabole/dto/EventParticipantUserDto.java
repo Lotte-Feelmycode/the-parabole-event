@@ -23,6 +23,8 @@ public class EventParticipantUserDto {
     private String winnerStatus;
     private String prizeName;
 
+    private String eventType;
+
     public void setWinnerStatus(String winnerStatus) {
         this.winnerStatus = winnerStatus;
     }
@@ -33,6 +35,7 @@ public class EventParticipantUserDto {
 
     public EventParticipantUserDto(EventParticipant eventParticipant) {
         Event event = eventParticipant.getEvent();
+        this.eventType = eventParticipant.getEvent().getType();
         this.userId = eventParticipant.getUserId();
         this.eventId = event.getId();
         this.eventTimeStartAt = eventParticipant.getEventTimeStartAt();

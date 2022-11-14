@@ -11,6 +11,7 @@ import com.feelmycode.parabole.service.EventParticipantService;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/event")
 @RequiredArgsConstructor
+@Slf4j
 public class EventApplyController {
 
     private final KafkaProducer kafkaProducer;
@@ -41,7 +43,8 @@ public class EventApplyController {
     }
 
     @PostMapping("/participant/test")
-    public ResponseEntity<ParaboleResponse> insertEventApplyTest(@RequestBody EventApplyTestDto dto){
+    public ResponseEntity<ParaboleResponse> insertEventApplyTest(
+        @RequestBody EventApplyTestDto dto) {
         eventParticipantService.applyCheckTest(dto);
         kafkaProducer.sendTest("v12-event-topic", dto);
         return ParaboleResponse.CommonResponse(HttpStatus.CREATED, true, "응모가 완료 되었습니다");
@@ -50,8 +53,7 @@ public class EventApplyController {
     @PostMapping("/participant/check")
     public ResponseEntity<ParaboleResponse> eventApplyCheck(
         @RequestBody RequestEventApplyCheckDto dto, @RequestAttribute Long userId) {
-        dto.setUserId(userId);
-        if (!eventParticipantService.eventApplyCheck(dto)) {
+        if (!eventParticipantService.eventApplyCheck(userId, dto)) {
             return ParaboleResponse.CommonResponse(HttpStatus.BAD_REQUEST, true,
                 dto.getEventId() + "번 이벤트에 이미 응모하였습니다", false);
         }
