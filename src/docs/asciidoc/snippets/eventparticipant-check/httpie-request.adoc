@@ -2,7 +2,7 @@
 ----
 $ echo '{
   "eventId" : 2
-}' | http POST 'https://parabole.com:52835/api/v1/event/participant/check' \
+}' | http POST 'https://parabole.com:60020/api/v1/event/participant/check' \
     'Accept:application/json, application/javascript, text/javascript, text/json' \
     'Authorization:Bearer eyJhbGciOiJIUzI1NiJ9.eyJzZWxsZXJTdG9yZW5hbWUiOiJ1MS1zMSdzIHN0b3JlIiwicm9sZSI6IlJPTEVfU0VMTEVSIiwic2VsbGVySWQiOjEsInBob25lIjoiMDEwNTc3ODUwMjMiLCJuaWNrbmFtZSI6InRlc3QiLCJ1c2VySWQiOjEsImVtYWlsIjoidGVzdEB0ZXN0LmNvbSIsInVzZXJuYW1lIjoidGVzdCIsImlhdCI6MTY2ODQxMDYwNiwiZXhwIjoxNjY4NDk3MDA2fQ.fyAqUxldrU_cSadbVXFop7DlKQHgri69Lm6l_d1tpho' \
     'Content-Type:application/json'
