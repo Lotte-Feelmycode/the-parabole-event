@@ -24,16 +24,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.stream.Collectors;
-import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class EventParticipantService {
 
     private final EventParticipantRepository eventParticipantRepository;
@@ -88,13 +88,10 @@ public class EventParticipantService {
         eventParticipantRepository.save(eventApply);
     }
 
-    public boolean eventApplyCheck(RequestEventApplyCheckDto dto) {
+    public boolean eventApplyCheck(Long userId, RequestEventApplyCheckDto dto) {
         EventParticipant eventParticipant = eventParticipantRepository.findByUserIdAndEventId(
-            dto.getUserId(), dto.getEventId());
-        if (eventParticipant != null) {
-            return false;
-        }
-        return true;
+            userId, dto.getEventId());
+        return eventParticipant == null;
     }
 
     public List<EventParticipantDto> getEventParticipants(Long eventId) {
