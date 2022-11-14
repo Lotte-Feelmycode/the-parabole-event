@@ -38,7 +38,7 @@ public class EventApplyController {
         EventApplyDto responseDto = new EventApplyDto(userId, dto.getEventId(),
             dto.getEventPrizeId(), email, username);
         eventParticipantService.applyCheck(responseDto);
-        kafkaProducer.send("v13-event-topic", responseDto);
+        kafkaProducer.send("v14-event-topic", responseDto);
         return ParaboleResponse.CommonResponse(HttpStatus.CREATED, true, "응모가 완료 되었습니다");
     }
 

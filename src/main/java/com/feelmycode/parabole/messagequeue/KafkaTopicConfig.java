@@ -21,6 +21,6 @@ public class KafkaTopicConfig {
 
     @Bean
     public NewTopic newTopic(){
-        return new NewTopic("v13-event-topic",3,(short)3);
+        return new NewTopic("v14-event-topic",3,(short)3);
     }
 }

@@ -22,7 +22,7 @@ public class KafkaConsumerConfig {
         properties.put(ConsumerConfig.GROUP_ID_CONFIG, "GroupEvent");
         properties.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         properties.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-      //  properties.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG,"10000");
+        properties.put(ConsumerConfig.FETCH_MIN_BYTES_CONFIG,"10000");
         return new DefaultKafkaConsumerFactory<>(properties);
     }
 
