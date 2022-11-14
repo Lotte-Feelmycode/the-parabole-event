@@ -1,0 +1,8 @@
+[source,options="nowrap"]
+----
+{
+  "success" : true,
+  "message" : "유저 이벤트 응모 리스트 조회 성공",
+  "data" : [ ]
+}
+----
