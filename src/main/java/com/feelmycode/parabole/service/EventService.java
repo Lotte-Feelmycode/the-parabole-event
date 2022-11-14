@@ -75,7 +75,6 @@ public class EventService {
 
         List<EventPrizeCreateRequestDto> eventPrizeDtos = eventDto.getEventPrizeCreateRequestDtos();
 
-
         // api > 마켓 / 이벤트
         // 이벤트 > 페인클라이언트 > 마켓 (X)
         if (!CollectionUtils.isEmpty(eventPrizeDtos)) {
@@ -88,13 +87,15 @@ public class EventService {
                     Product product = Product.of(paraboleServiceClient.getProduct(id));
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrize.getStock(), product));
-                     paraboleServiceClient.setProductRemains(product.getId(), -1 * (eventPrize.getStock()));
+                    paraboleServiceClient.setProductRemains(product.getId(),
+                        -1 * (eventPrize.getStock()));
                 } else {
                     // TODO: coupon null exception 처리
                     Coupon coupon = Coupon.of(paraboleServiceClient.getCoupon(id));
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrize.getStock(), coupon));
-                     paraboleServiceClient.setCouponRemains(coupon.getId(), -1 * (eventPrize.getStock()));
+                    paraboleServiceClient.setCouponRemains(coupon.getId(),
+                        -1 * (eventPrize.getStock()));
                 }
             }
         }
@@ -146,7 +147,7 @@ public class EventService {
      */
     public List<EventSearchResponseDto> getEventsSearch(
         String eventType, String eventTitle, Integer dateDiv, LocalDateTime fromDateTime,
-        LocalDateTime toDateTime, Integer eventStatus) {
+        LocalDateTime toDateTime, Integer eventStatus, Long sellerId) {
 
         List<Event> eventList = null;
         List<String> types =
@@ -168,9 +169,17 @@ public class EventService {
                 types, statuses, eventTitle, false);
         }
 
-        return eventList.stream()
-            .map(EventSearchResponseDto::new)
-            .collect(Collectors.toList());
+        if (sellerId != null) {
+            return eventList.stream()
+                .filter(event -> event.getSellerId().equals(sellerId))
+                .map(EventSearchResponseDto::new)
+                .collect(Collectors.toList());
+        } else {
+            return eventList.stream()
+                .map(EventSearchResponseDto::new)
+                .collect(Collectors.toList());
+        }
+
     }
 
     /**

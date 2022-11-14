@@ -68,7 +68,8 @@ public class EventController {
         @RequestParam(required = false) Integer dateDiv,
         @RequestParam(required = false) LocalDateTime fromDateTime,
         @RequestParam(required = false) LocalDateTime toDateTime,
-        @RequestParam(required = false) Integer eventStatus
+        @RequestParam(required = false) Integer eventStatus,
+        @RequestAttribute(required = false) Long sellerId
     ) {
         Integer getDateDiv = StringUtil.controllerParamIsBlank(dateDiv + "") ? -1 : dateDiv;
         String getEventType = StringUtil.controllerParamIsBlank(eventType) ? "" : eventType;
@@ -77,7 +78,7 @@ public class EventController {
             StringUtil.controllerParamIsBlank(eventStatus + "") ? -1 : eventStatus;
 
         List<EventSearchResponseDto> response = eventService.getEventsSearch(
-            getEventType, getEventTitle, getDateDiv, fromDateTime, toDateTime, getEventStatus
+            getEventType, getEventTitle, getDateDiv, fromDateTime, toDateTime, getEventStatus, sellerId
         );
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 검색 리스트 조회 성공", response);
     }
