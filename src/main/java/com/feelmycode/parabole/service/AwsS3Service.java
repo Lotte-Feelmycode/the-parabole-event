@@ -7,8 +7,11 @@ import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.amazonaws.services.s3.model.PutObjectRequest;
+import com.amazonaws.util.IOUtils;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
@@ -44,10 +47,25 @@ public class AwsS3Service {
     }
 
     public String upload(MultipartFile file) throws IOException {
+
+        byte[] contentBytes = null;
+        try {
+            InputStream is = file.getInputStream();
+            contentBytes = IOUtils.toByteArray(is);
+        } catch (IOException e) {
+            log.error("Failed while reading bytes from %s", e.getMessage());
+        }
+
+        Long contentLength = Long.valueOf(contentBytes.length);
+
+        ObjectMetadata metadata = new ObjectMetadata();
+        metadata.setContentLength(contentLength);
+
         String fileName = createFileName(file.getOriginalFilename());
 
-        amazonS3.putObject(new PutObjectRequest(bucket, fileName, file.getInputStream(), null)
+        amazonS3.putObject(new PutObjectRequest(bucket, fileName, file.getInputStream(), metadata)
             .withCannedAcl(CannedAccessControlList.PublicRead));
+
         return amazonS3.getUrl(bucket, fileName).toString();
     }
 
