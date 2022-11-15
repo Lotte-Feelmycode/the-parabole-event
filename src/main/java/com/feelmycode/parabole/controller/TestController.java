@@ -8,13 +8,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/test")
+@RequestMapping("/api/v1/event")
 @RequiredArgsConstructor
 public class TestController {
 
     private final ParaboleServiceClient paraboleServiceClient;
 
-    @GetMapping
+    @GetMapping("/test")
     public void testController(@RequestParam Long productId){
         System.out.println(paraboleServiceClient.getProduct(productId));
     }
