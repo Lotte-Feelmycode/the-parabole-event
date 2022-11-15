@@ -23,10 +23,10 @@ public class EventCreateRequestDto {
     private String title;
 
     @NotNull
-    private LocalDateTime startAt;
+    private String startAt;
 
     @NotNull
-    private LocalDateTime endAt;
+    private String endAt;
 
     @NotBlank(message = "이벤트 설명을 입력해주세요.")
     private String descript;
