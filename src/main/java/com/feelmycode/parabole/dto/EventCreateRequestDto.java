@@ -23,10 +23,10 @@ public class EventCreateRequestDto {
     private String title;
 
     @NotNull
-    private LocalDateTime startAt;
+    private String startAt;
 
     @NotNull
-    private LocalDateTime endAt;
+    private String endAt;
 
     @NotBlank(message = "이벤트 설명을 입력해주세요.")
     private String descript;
@@ -34,7 +34,7 @@ public class EventCreateRequestDto {
     private List<EventPrizeCreateRequestDto> eventPrizeCreateRequestDtos;
 
     public EventCreateRequestDto(String createdBy, String type, String title,
-        LocalDateTime startAt, LocalDateTime endAt, String descript, EventImage eventImage,
+        String startAt, String endAt, String descript, EventImage eventImage,
         List<EventPrizeCreateRequestDto> eventPrizeCreateRequestDtos) {
         this.createdBy = createdBy;
         this.type = type;
