@@ -8,9 +8,11 @@ import javax.validation.constraints.NotNull;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
+@ToString
 public class EventCreateRequestDto {
 
     @NotNull
@@ -23,10 +25,10 @@ public class EventCreateRequestDto {
     private String title;
 
     @NotNull
-    private LocalDateTime startAt;
+    private String startAt;
 
     @NotNull
-    private LocalDateTime endAt;
+    private String endAt;
 
     @NotBlank(message = "이벤트 설명을 입력해주세요.")
     private String descript;
@@ -34,7 +36,7 @@ public class EventCreateRequestDto {
     private List<EventPrizeCreateRequestDto> eventPrizeCreateRequestDtos;
 
     public EventCreateRequestDto(String createdBy, String type, String title,
-        LocalDateTime startAt, LocalDateTime endAt, String descript, EventImage eventImage,
+        String startAt, String endAt, String descript, EventImage eventImage,
         List<EventPrizeCreateRequestDto> eventPrizeCreateRequestDtos) {
         this.createdBy = createdBy;
         this.type = type;
@@ -44,5 +46,9 @@ public class EventCreateRequestDto {
         this.descript = descript;
         this.eventImage = eventImage;
         this.eventPrizeCreateRequestDtos = eventPrizeCreateRequestDtos;
+    }
+
+    public void setEventImage(String bannerImg, String detailImg) {
+        this.eventImage = new EventImage(bannerImg, detailImg);
     }
 }

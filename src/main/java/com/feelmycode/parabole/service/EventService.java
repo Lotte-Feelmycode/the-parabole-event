@@ -14,6 +14,7 @@ import com.feelmycode.parabole.dto.EventPrizeDto;
 import com.feelmycode.parabole.dto.EventSearchResponseDto;
 import com.feelmycode.parabole.dto.ProductResponseDto;
 import com.feelmycode.parabole.global.error.exception.ParaboleException;
+import com.feelmycode.parabole.global.util.StringUtil;
 import com.feelmycode.parabole.repository.EventPrizeRepository;
 import com.feelmycode.parabole.repository.EventRepository;
 import java.time.LocalDateTime;
@@ -69,29 +70,29 @@ public class EventService {
     @Transactional
     public Long createEvent(Long sellerId, EventCreateRequestDto eventDto) {
 
-        log.info(eventDto.toString());
+        log.info("이벤트 생성 {}", eventDto.toString());
 
         List<EventPrize> eventPrizeList = new ArrayList<>();
 
         List<EventPrizeCreateRequestDto> eventPrizeDtos = eventDto.getEventPrizeCreateRequestDtos();
 
-        // api > 마켓 / 이벤트
-        // 이벤트 > 페인클라이언트 > 마켓 (X)
         if (!CollectionUtils.isEmpty(eventPrizeDtos)) {
             for (EventPrizeCreateRequestDto eventPrize : eventPrizeDtos) {
                 String prizeType = eventPrize.getType();
                 Long id = eventPrize.getId();
 
                 if (prizeType.equals("PRODUCT")) {
-                    // TODO: product null exception 처리
                     Product product = Product.of(paraboleServiceClient.getProduct(id));
+                    log.info("product from market be {} :", product.getName());
+
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrize.getStock(), product));
                     paraboleServiceClient.setProductRemains(product.getId(),
                         -1 * (eventPrize.getStock()));
                 } else {
-                    // TODO: coupon null exception 처리
                     Coupon coupon = Coupon.of(paraboleServiceClient.getCoupon(id));
+                    log.info("coupon from market be {} :", coupon.getName());
+
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrize.getStock(), coupon));
                     paraboleServiceClient.setCouponRemains(coupon.getId(),
@@ -100,11 +101,13 @@ public class EventService {
             }
         }
 
+        LocalDateTime getStartAt = StringUtil.controllerParamIsBlank(eventDto.getStartAt()) ? null : LocalDateTime.parse(eventDto.getStartAt());
+        LocalDateTime getEndAt = StringUtil.controllerParamIsBlank(eventDto.getEndAt()) ? null : LocalDateTime.parse(eventDto.getEndAt());
         // 이벤트 생성
         Event event = Event.builder()
             .sellerId(sellerId)
             .createdBy(eventDto.getCreatedBy()).type(eventDto.getType())
-            .title(eventDto.getTitle()).startAt(eventDto.getStartAt()).endAt(eventDto.getEndAt())
+            .title(eventDto.getTitle()).startAt(getStartAt).endAt(getEndAt)
             .descript(eventDto.getDescript()).eventImage(eventDto.getEventImage())
             .eventPrizes(eventPrizeList).build();
 
