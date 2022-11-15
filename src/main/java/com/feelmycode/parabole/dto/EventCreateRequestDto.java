@@ -45,4 +45,8 @@ public class EventCreateRequestDto {
         this.eventImage = eventImage;
         this.eventPrizeCreateRequestDtos = eventPrizeCreateRequestDtos;
     }
+
+    public void setEventImage(String bannerImg, String detailImg) {
+        this.eventImage = new EventImage(bannerImg, detailImg);
+    }
 }
