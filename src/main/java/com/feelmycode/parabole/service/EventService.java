@@ -78,6 +78,7 @@ public class EventService {
 
         if (!CollectionUtils.isEmpty(eventPrizeDtos)) {
             for (EventPrizeCreateRequestDto eventPrize : eventPrizeDtos) {
+                log.info("이벤트 경품 {}", eventPrize.toString());
                 String prizeType = eventPrize.getType();
                 Long id = eventPrize.getId();
 
