@@ -40,7 +40,7 @@ public class EventController {
         @RequestPart("eventDtos") @Valid EventCreateRequestDto eventDto,
         @RequestPart("images") List<MultipartFile> eventImages) {
         Long eventId = -1L;
-        if (!eventService.canCreateEvent(sellerId, eventDto.getStartAt().toString())) {
+        if (!eventService.canCreateEvent(sellerId, eventDto.getStartAt())) {
             throw new ParaboleException(HttpStatus.ALREADY_REPORTED, "이벤트 등록 실패");
         }
         try {

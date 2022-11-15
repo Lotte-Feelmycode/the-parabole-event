@@ -82,15 +82,17 @@ public class EventService {
                 Long id = eventPrize.getId();
 
                 if (prizeType.equals("PRODUCT")) {
-                    // TODO: product null exception 처리
                     Product product = Product.of(paraboleServiceClient.getProduct(id));
+                    log.info("product from market be {} :", product.getName());
+
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrize.getStock(), product));
                     paraboleServiceClient.setProductRemains(product.getId(),
                         -1 * (eventPrize.getStock()));
                 } else {
-                    // TODO: coupon null exception 처리
                     Coupon coupon = Coupon.of(paraboleServiceClient.getCoupon(id));
+                    log.info("coupon from market be {} :", coupon.getName());
+
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrize.getStock(), coupon));
                     paraboleServiceClient.setCouponRemains(coupon.getId(),
