@@ -78,6 +78,7 @@ public class EventService {
 
         if (!CollectionUtils.isEmpty(eventPrizeDtos)) {
             for (EventPrizeCreateRequestDto eventPrize : eventPrizeDtos) {
+                log.info("이벤트 경품 {}", eventPrize.toString());
                 String prizeType = eventPrize.getType();
                 Long id = eventPrize.getId();
 
@@ -243,9 +244,11 @@ public class EventService {
             event.cancel();
             event.getEventPrizes().forEach(e -> {
                 if (e.getPrizeType().equals("PRODUCT")) {
-                    paraboleServiceClient.setCouponRemains(e.getId(), e.getStock());
+                    log.info("cancel event no.{} & product no.{}", eventId, e.getProduct().getId());
+                    paraboleServiceClient.setProductRemains(e.getProduct().getId(), e.getStock());
                 } else if (e.getPrizeType().equals("COUPON")) {
-                    paraboleServiceClient.setCouponRemains(e.getId(), e.getStock());
+                    log.info("cancel event no.{} & coupon no.{}", eventId, e.getCoupon().getId());
+                    paraboleServiceClient.setCouponRemains(e.getCoupon().getId(), e.getStock());
                 }
             });
             eventRepository.save(event);
