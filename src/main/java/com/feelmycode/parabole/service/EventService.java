@@ -14,6 +14,7 @@ import com.feelmycode.parabole.dto.EventPrizeDto;
 import com.feelmycode.parabole.dto.EventSearchResponseDto;
 import com.feelmycode.parabole.dto.ProductResponseDto;
 import com.feelmycode.parabole.global.error.exception.ParaboleException;
+import com.feelmycode.parabole.global.util.StringUtil;
 import com.feelmycode.parabole.repository.EventPrizeRepository;
 import com.feelmycode.parabole.repository.EventRepository;
 import java.time.LocalDateTime;
@@ -69,14 +70,12 @@ public class EventService {
     @Transactional
     public Long createEvent(Long sellerId, EventCreateRequestDto eventDto) {
 
-        log.info(eventDto.toString());
+        log.info("이벤트 생성 {}", eventDto.toString());
 
         List<EventPrize> eventPrizeList = new ArrayList<>();
 
         List<EventPrizeCreateRequestDto> eventPrizeDtos = eventDto.getEventPrizeCreateRequestDtos();
 
-        // api > 마켓 / 이벤트
-        // 이벤트 > 페인클라이언트 > 마켓 (X)
         if (!CollectionUtils.isEmpty(eventPrizeDtos)) {
             for (EventPrizeCreateRequestDto eventPrize : eventPrizeDtos) {
                 String prizeType = eventPrize.getType();
@@ -100,11 +99,13 @@ public class EventService {
             }
         }
 
+        LocalDateTime getStartAt = StringUtil.controllerParamIsBlank(eventDto.getStartAt()) ? null : LocalDateTime.parse(eventDto.getStartAt());
+        LocalDateTime getEndAt = StringUtil.controllerParamIsBlank(eventDto.getEndAt()) ? null : LocalDateTime.parse(eventDto.getEndAt());
         // 이벤트 생성
         Event event = Event.builder()
             .sellerId(sellerId)
             .createdBy(eventDto.getCreatedBy()).type(eventDto.getType())
-            .title(eventDto.getTitle()).startAt(eventDto.getStartAt()).endAt(eventDto.getEndAt())
+            .title(eventDto.getTitle()).startAt(getStartAt).endAt(getEndAt)
             .descript(eventDto.getDescript()).eventImage(eventDto.getEventImage())
             .eventPrizes(eventPrizeList).build();
 
