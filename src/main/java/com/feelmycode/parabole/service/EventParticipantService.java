@@ -100,6 +100,8 @@ public class EventParticipantService {
 
         return eventParticipantList.stream()
             .map(EventParticipantDto::new)
+            .sorted(Comparator.comparing(
+                eventParticipantDto -> eventParticipantDto.getEventTimeStartAt()))
             .collect(Collectors.toList());
     }
 
