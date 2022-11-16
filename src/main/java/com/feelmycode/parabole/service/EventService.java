@@ -88,8 +88,9 @@ public class EventService {
 
                     eventPrizeList.add(
                         new EventPrize(prizeType, eventPrize.getStock(), product));
-                    paraboleServiceClient.setProductRemains(product.getId(),
-                        -1 * (eventPrize.getStock()));
+
+//                    paraboleServiceClient.setProductRemains(product.getId(),
+//                        -1 * (eventPrize.getStock()));
                 } else {
                     Coupon coupon = Coupon.of(paraboleServiceClient.getCoupon(id));
                     log.info("coupon from market be {} :", coupon.getName());
@@ -245,10 +246,14 @@ public class EventService {
             event.getEventPrizes().forEach(e -> {
                 if (e.getPrizeType().equals("PRODUCT")) {
                     log.info("cancel event no.{} & product no.{}", eventId, e.getProduct().getId());
-                    paraboleServiceClient.setProductRemains(e.getProduct().getId(), e.getStock());
+                    if (!paraboleServiceClient.setProductRemains(e.getProduct().getId(), e.getStock())) {
+                        throw new ParaboleException(HttpStatus.INTERNAL_SERVER_ERROR, "상품 수량 취소가 불가능합니다.");
+                    };
                 } else if (e.getPrizeType().equals("COUPON")) {
                     log.info("cancel event no.{} & coupon no.{}", eventId, e.getCoupon().getId());
-                    paraboleServiceClient.setCouponRemains(e.getCoupon().getId(), e.getStock());
+                    if (!paraboleServiceClient.setCouponRemains(e.getCoupon().getId(), e.getStock())) {
+                        throw new ParaboleException(HttpStatus.INTERNAL_SERVER_ERROR, "쿠폰 수량 취소가 불가능합니다.");
+                    };
                 }
             });
             eventRepository.save(event);
