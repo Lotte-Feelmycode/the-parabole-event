@@ -103,8 +103,10 @@ public class EventService {
             }
         }
 
-        LocalDateTime getStartAt = StringUtil.controllerParamIsBlank(eventDto.getStartAt()) ? null : LocalDateTime.parse(eventDto.getStartAt());
-        LocalDateTime getEndAt = StringUtil.controllerParamIsBlank(eventDto.getEndAt()) ? null : LocalDateTime.parse(eventDto.getEndAt());
+        LocalDateTime getStartAt = StringUtil.controllerParamIsBlank(eventDto.getStartAt()) ? null
+            : LocalDateTime.parse(eventDto.getStartAt());
+        LocalDateTime getEndAt = StringUtil.controllerParamIsBlank(eventDto.getEndAt()) ? null
+            : LocalDateTime.parse(eventDto.getEndAt());
         // 이벤트 생성
         Event event = Event.builder()
             .sellerId(sellerId)
@@ -191,7 +193,8 @@ public class EventService {
      * 이벤트 전체 조회 (삭제된 이벤트 제외)
      */
     public List<Event> getEventsAllNotDeleted() {
-        return eventRepository.findAllByIsDeletedOrderByStartAtDescAndCreatedDesc(false);
+        return eventRepository.findAllByIsDeletedOrderByStartAtDesc(false).stream()
+            .sorted(Comparator.comparing(Event::getCreatedAt).reversed()).toList();
     }
 
     /**
@@ -247,14 +250,20 @@ public class EventService {
             event.getEventPrizes().forEach(e -> {
                 if (e.getPrizeType().equals("PRODUCT")) {
                     log.info("cancel event no.{} & product no.{}", eventId, e.getProduct().getId());
-                    if (!paraboleServiceClient.setProductRemains(e.getProduct().getId(), e.getStock())) {
-                        throw new ParaboleException(HttpStatus.INTERNAL_SERVER_ERROR, "상품 수량 취소가 불가능합니다.");
-                    };
+                    if (!paraboleServiceClient.setProductRemains(e.getProduct().getId(),
+                        e.getStock())) {
+                        throw new ParaboleException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "상품 수량 취소가 불가능합니다.");
+                    }
+                    ;
                 } else if (e.getPrizeType().equals("COUPON")) {
                     log.info("cancel event no.{} & coupon no.{}", eventId, e.getCoupon().getId());
-                    if (!paraboleServiceClient.setCouponRemains(e.getCoupon().getId(), e.getStock())) {
-                        throw new ParaboleException(HttpStatus.INTERNAL_SERVER_ERROR, "쿠폰 수량 취소가 불가능합니다.");
-                    };
+                    if (!paraboleServiceClient.setCouponRemains(e.getCoupon().getId(),
+                        e.getStock())) {
+                        throw new ParaboleException(HttpStatus.INTERNAL_SERVER_ERROR,
+                            "쿠폰 수량 취소가 불가능합니다.");
+                    }
+                    ;
                 }
             });
 
