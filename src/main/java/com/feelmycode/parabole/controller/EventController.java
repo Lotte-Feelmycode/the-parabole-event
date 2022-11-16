@@ -41,7 +41,7 @@ public class EventController {
         @RequestPart("images") List<MultipartFile> eventImages) {
         Long eventId = -1L;
         if (!eventService.canCreateEvent(sellerId, eventDto.getStartAt())) {
-            throw new ParaboleException(HttpStatus.ALREADY_REPORTED, "이벤트 등록 실패");
+            throw new ParaboleException(HttpStatus.ALREADY_REPORTED, "이벤트 등록 불가능");
         }
         try {
             String bannerImg = awsS3Service.upload(eventImages.get(0));
@@ -50,7 +50,7 @@ public class EventController {
 
             eventId = eventService.createEvent(sellerId, eventDto);
         } catch (Exception e) {
-            throw new ParaboleException(HttpStatus.INTERNAL_SERVER_ERROR, "이벤트 등록 실패");
+            throw new ParaboleException(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
         }
         return ParaboleResponse.CommonResponse(HttpStatus.CREATED, true, "이벤트 등록 성공", eventId);
     }
