@@ -4,6 +4,7 @@ import com.feelmycode.parabole.domain.Event;
 import com.feelmycode.parabole.domain.EventParticipant;
 import com.feelmycode.parabole.domain.EventWinner;
 import com.feelmycode.parabole.dto.EventApplyDto;
+import com.feelmycode.parabole.dto.EventApplyTestDto;
 import com.feelmycode.parabole.global.error.exception.ParaboleException;
 import com.feelmycode.parabole.repository.EventParticipantRepository;
 import com.feelmycode.parabole.domain.EventPrize;
@@ -15,7 +16,6 @@ import com.feelmycode.parabole.repository.EventRepository;
 import com.feelmycode.parabole.repository.EventWinnerRepository;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -23,18 +23,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
-import javax.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = false)
 public class EventParticipantService {
 
     private final EventParticipantRepository eventParticipantRepository;
@@ -44,14 +43,37 @@ public class EventParticipantService {
     private final EventWinnerRepository eventWinnerRepository;
 
     public List<EventParticipantUserDto> getEventParticipantUser(Long userId) {
-        List<EventParticipant> eventParticipant = eventParticipantRepository.findAllByUserId(
+        List<EventParticipant> eventParticipantList = eventParticipantRepository.findAllByUserId(
             userId);
-
-        if (eventParticipant == null) {
+        List<EventParticipantUserDto> result = new ArrayList<>();
+        if (eventParticipantList == null) {
             throw new ParaboleException(HttpStatus.NOT_FOUND, "이벤트 참여내역이 없습니다.");
         }
-        return eventParticipant.stream().map(EventParticipantUserDto::new)
-            .collect(Collectors.toList());
+        for (EventParticipant eventParticipant : eventParticipantList) {
+            boolean eventWinnerCheck = eventWinnerRepository.existsByEventId(
+                eventParticipant.getEvent().getId());
+            if (eventWinnerCheck) {
+                EventParticipantUserDto eventParticipantUserDto = new EventParticipantUserDto(
+                    eventParticipant);
+                EventWinner eventWinner = eventWinnerRepository.findByUserIdAndEventId(userId,
+                    eventParticipant.getEvent().getId());
+                if (eventWinner != null) {
+                    EventPrize eventPrize = eventWinner.getEventPrize();
+                    eventParticipantUserDto.setPrizeName(
+                        eventPrize.getPrizeType().equals("PRODUCT") ? eventPrize.getProduct()
+                            .getName() : eventPrize.getCoupon().getName());
+                    eventParticipantUserDto.setWinnerStatus("당첨");
+                    result.add(eventParticipantUserDto);
+                } else {
+                    eventParticipantUserDto.setWinnerStatus("미당첨");
+                    result.add(eventParticipantUserDto);
+                }
+            } else {
+                result.add(new EventParticipantUserDto(eventParticipant));
+            }
+        }
+
+        return result;
     }
 
     public void eventJoin(EventApplyDto eventApplyDto) {
@@ -60,18 +82,16 @@ public class EventParticipantService {
             eventApplyDto.getUserId(),
             getEvent(eventApplyDto.getEventId()),
             getEventPrize(eventApplyDto.getEventPrizeId()),
-            LocalDateTime.now());
+            LocalDateTime.now(), eventApplyDto.getUserEmail(), eventApplyDto.getUserName()
+        );
 
         eventParticipantRepository.save(eventApply);
     }
 
-    public boolean eventApplyCheck(RequestEventApplyCheckDto dto) {
+    public boolean eventApplyCheck(Long userId, RequestEventApplyCheckDto dto) {
         EventParticipant eventParticipant = eventParticipantRepository.findByUserIdAndEventId(
-            dto.getUserId(), dto.getEventId());
-        if (eventParticipant != null) {
-            return false;
-        }
-        return true;
+            userId, dto.getEventId());
+        return eventParticipant == null;
     }
 
     public List<EventParticipantDto> getEventParticipants(Long eventId) {
@@ -80,6 +100,8 @@ public class EventParticipantService {
 
         return eventParticipantList.stream()
             .map(EventParticipantDto::new)
+            .sorted(Comparator.comparing(
+                eventParticipantDto -> eventParticipantDto.getEventTimeStartAt()))
             .collect(Collectors.toList());
     }
 
@@ -123,7 +145,7 @@ public class EventParticipantService {
                 stock--;
                 eventWinnerRepository.save(
                     new EventWinner(eventParticipant.getUserId(), eventParticipant.getEvent(),
-                        eventParticipant.getEventPrize()));
+                        eventParticipant.getEventPrize(), eventParticipant));
             }
             EventPrize resultEventPrize = getEventPrize(prizeId);
             resultEventPrize.setStock(stock);
@@ -135,6 +157,14 @@ public class EventParticipantService {
     public void applyCheck(EventApplyDto eventApplyDto) {
         EventParticipant eventParticipant = eventParticipantRepository.findByUserIdAndEventId(
             eventApplyDto.getUserId(), eventApplyDto.getEventId());
+        if (eventParticipant != null) {
+            throw new ParaboleException(HttpStatus.ALREADY_REPORTED, "이미 응모 완료 되었습니다");
+        }
+    }
+
+    public void applyCheckTest(EventApplyTestDto eventApplyTestDto) {
+        EventParticipant eventParticipant = eventParticipantRepository.findByUserIdAndEventId(
+            eventApplyTestDto.getUserId(), eventApplyTestDto.getEventId());
         if (eventParticipant != null) {
             throw new ParaboleException(HttpStatus.ALREADY_REPORTED, "이미 응모 완료 되었습니다");
         }
@@ -156,20 +186,20 @@ public class EventParticipantService {
         EventPrize eventPrize = getEventPrize(prizeId);
         Integer stock = eventPrize.getStock();
         Random randomNum = new Random();
-        Map<Long, Integer> applyMap = new HashMap<>();
+        Map<EventParticipant, Integer> applyMap = new HashMap<>();
         for (EventParticipant raffle : raffleList) {
             randomNum.setSeed(
                 raffle.getEventTimeStartAt().atZone(ZoneId.of("Asia/Seoul")).toInstant()
                     .toEpochMilli());
             Integer num = (randomNum.nextInt(raffleList.size()) + 1);
-            applyMap.put(raffle.getUserId(), num);
+            applyMap.put(raffle, num);
         }
-        List<Map.Entry<Long, Integer>> entryList = new LinkedList<>(applyMap.entrySet());
+        List<Map.Entry<EventParticipant, Integer>> entryList = new LinkedList<>(applyMap.entrySet());
         entryList.sort(Map.Entry.comparingByValue());
-        for (Map.Entry<Long, Integer> entry : entryList) {
+        for (Map.Entry<EventParticipant, Integer> entry : entryList) {
             if (stock != 0) {
                 eventWinnerRepository.save(
-                    new EventWinner(entry.getKey(), raffleEvent, eventPrize));
+                    new EventWinner(entry.getKey().getUserId(), raffleEvent, eventPrize, entry.getKey()));
                 stock--;
             }
         }

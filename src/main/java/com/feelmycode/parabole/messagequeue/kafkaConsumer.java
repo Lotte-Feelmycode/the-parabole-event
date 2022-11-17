@@ -29,7 +29,7 @@ public class kafkaConsumer {
         this.eventParticipantService = eventParticipantService;
     }
     @Transactional
-    @KafkaListener(topics = "v1-event-topic")
+    @KafkaListener(topics = "v14-event-topic",groupId = "GroupEvent")
     public void updateQty(String kafkaMessage) {
         log.info("kafka Message : =>" + kafkaMessage);
 
@@ -42,8 +42,8 @@ public class kafkaConsumer {
             ex.printStackTrace();
         }
         EventApplyDto applyDto = new EventApplyDto(ObjectToLong(map.get("userId")),
-            ObjectToLong(map.get("eventId")), ObjectToLong(map.get("eventPrizeId")));
-
+        ObjectToLong(map.get("eventId")), ObjectToLong(map.get("eventPrizeId")),
+            String.valueOf(map.get("userEmail")), String.valueOf(map.get("userName")));
         eventParticipantService.eventJoin(applyDto);
     }
 

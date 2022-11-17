@@ -1,6 +1,7 @@
 package com.feelmycode.parabole.controller;
 
 import com.feelmycode.parabole.dto.EventApplyDto;
+import com.feelmycode.parabole.dto.EventApplyTestDto;
 import com.feelmycode.parabole.dto.EventParticipantDto;
 import com.feelmycode.parabole.dto.EventParticipantUserDto;
 import com.feelmycode.parabole.dto.RequestEventApplyCheckDto;
@@ -10,18 +11,21 @@ import com.feelmycode.parabole.service.EventParticipantService;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v2/event")
+@RequestMapping("/api/v1/event")
 @RequiredArgsConstructor
+@Slf4j
 public class EventApplyController {
 
     private final KafkaProducer kafkaProducer;
@@ -29,19 +33,28 @@ public class EventApplyController {
 
     @PostMapping("/participant")
     public ResponseEntity<ParaboleResponse> insertEventApply(
-        @RequestBody EventApplyDto dto) {
+        @RequestBody EventApplyDto dto, @RequestAttribute Long userId,
+        @RequestAttribute String email, @RequestAttribute String username) {
+        EventApplyDto responseDto = new EventApplyDto(userId, dto.getEventId(),
+            dto.getEventPrizeId(), email, username);
+        eventParticipantService.applyCheck(responseDto);
+        kafkaProducer.send("v14-event-topic", responseDto);
+        return ParaboleResponse.CommonResponse(HttpStatus.CREATED, true, "응모가 완료 되었습니다");
+    }
 
-        eventParticipantService.applyCheck(dto);
-        kafkaProducer.send("v1-event-topic", dto);
-
+    @PostMapping("/participant/test")
+    public ResponseEntity<ParaboleResponse> insertEventApplyTest(
+        @RequestBody EventApplyTestDto dto) {
+        eventParticipantService.applyCheckTest(dto);
+        kafkaProducer.sendTest("v14-event-topic", dto);
         return ParaboleResponse.CommonResponse(HttpStatus.CREATED, true, "응모가 완료 되었습니다");
     }
 
     @PostMapping("/participant/check")
     public ResponseEntity<ParaboleResponse> eventApplyCheck(
-        @RequestBody RequestEventApplyCheckDto dto) {
-        if (!eventParticipantService.eventApplyCheck(dto)) {
-            return ParaboleResponse.CommonResponse(HttpStatus.ALREADY_REPORTED, true,
+        @RequestBody RequestEventApplyCheckDto dto, @RequestAttribute Long userId) {
+        if (!eventParticipantService.eventApplyCheck(userId, dto)) {
+            return ParaboleResponse.CommonResponse(HttpStatus.BAD_REQUEST, true,
                 dto.getEventId() + "번 이벤트에 이미 응모하였습니다", false);
         }
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true,
@@ -54,8 +67,9 @@ public class EventApplyController {
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "이벤트 응모 리스트 조회 성공", response);
     }
 
-    @GetMapping("/user/participant/{userId}")
-    public ResponseEntity<ParaboleResponse> getUserEventParticipants(@PathVariable Long userId) {
+    @GetMapping("/user/participant")
+    public ResponseEntity<ParaboleResponse> getUserEventParticipants(
+        @RequestAttribute Long userId) {
         List<EventParticipantUserDto> response = eventParticipantService.getEventParticipantUser(
             userId);
         return ParaboleResponse.CommonResponse(HttpStatus.OK, true, "유저 이벤트 응모 리스트 조회 성공",

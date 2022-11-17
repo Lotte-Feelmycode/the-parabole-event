@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
 public class ProductResponseDto {
 
     private Long productId;
@@ -16,4 +17,6 @@ public class ProductResponseDto {
         this.productName = productName;
         this.productImg = productImg;
     }
+
+
 }

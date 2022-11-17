@@ -2,6 +2,7 @@ package com.feelmycode.parabole.dto;
 
 import com.feelmycode.parabole.domain.Event;
 import com.feelmycode.parabole.domain.EventParticipant;
+import com.feelmycode.parabole.domain.EventWinner;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -20,9 +21,21 @@ public class EventParticipantUserDto {
     private Integer status;
     private String eventImg;
     private String winnerStatus;
+    private String prizeName;
+
+    private String eventType;
+
+    public void setWinnerStatus(String winnerStatus) {
+        this.winnerStatus = winnerStatus;
+    }
+
+    public void setPrizeName(String prizeName) {
+        this.prizeName = prizeName;
+    }
 
     public EventParticipantUserDto(EventParticipant eventParticipant) {
         Event event = eventParticipant.getEvent();
+        this.eventType = eventParticipant.getEvent().getType();
         this.userId = eventParticipant.getUserId();
         this.eventId = event.getId();
         this.eventTimeStartAt = eventParticipant.getEventTimeStartAt();

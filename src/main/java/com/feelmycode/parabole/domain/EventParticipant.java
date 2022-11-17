@@ -36,11 +36,17 @@ public class EventParticipant {
     @Column(columnDefinition = "DateTime(6) not null")
     private LocalDateTime eventTimeStartAt;
 
+    private String userEmail;
+
+    private String userName;
+
     public EventParticipant(Long userId, Event event, EventPrize eventPrize,
-        LocalDateTime eventTimeStartAt) {
+        LocalDateTime eventTimeStartAt, String userEmail, String userName) {
         this.userId = userId;
         this.event = event;
         this.eventPrize = eventPrize;
         this.eventTimeStartAt = eventTimeStartAt;
+        this.userEmail = userEmail;
+        this.userName = userName;
     }
 }

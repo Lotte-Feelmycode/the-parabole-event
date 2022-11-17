@@ -1,0 +1,7 @@
+[source,options="nowrap"]
+----
+{
+  "eventId" : 1,
+  "eventPrizeId" : 1
+}
+----

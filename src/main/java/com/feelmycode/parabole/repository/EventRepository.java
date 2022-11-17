@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface EventRepository extends JpaRepository<Event, Long> {
 
-    List<Event> findAllByIsDeleted(boolean isDeleted);
+    List<Event> findAllByIsDeletedOrderByStartAtDesc(boolean isDeleted);
 
     List<Event> findAllBySellerIdAndIsDeleted(Long sellerId, boolean isDeleted);
 
@@ -28,5 +28,13 @@ public interface EventRepository extends JpaRepository<Event, Long> {
     List<Event> findAllByStatus(Integer status);
 
     Event findByStatusAndType(Integer status, String eventType);
+
+    List<Event> findAllBySellerIdAndStatus(Long sellerId, Integer status);
+
+    List<Event> findAllByTypeInAndStatusInAndIsDeleted(List<String> eventType,
+        List<Integer> eventStauts, boolean isDeleted);
+
+    List<Event> findAllByTypeInAndStatusInAndTitleContainingAndIsDeleted(List<String> eventType,
+        List<Integer> eventStauts, String eventTitle, boolean isDeleted);
 
 }
