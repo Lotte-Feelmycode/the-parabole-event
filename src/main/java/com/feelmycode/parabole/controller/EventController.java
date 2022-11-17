@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 @RequiredArgsConstructor
-@CrossOrigin("*")
 @RequestMapping("/api/v1/event")
 @RestController
 public class EventController {
