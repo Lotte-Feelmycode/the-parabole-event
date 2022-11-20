@@ -202,7 +202,7 @@ public class EventService {
                 .sorted(Comparator.comparing(Event::getStartAt)),
             eventRepository.findAllByTypeInAndStatusInAndTitleContainingAndIsDeleted(
                     types, Arrays.asList(0, 2), "", false).stream()
-                .sorted(Comparator.comparing(Event::getStatus))
+                .sorted(Comparator.comparing(Event::getStatus).thenComparing(Event::getStartAt))
         ).collect(Collectors.toList());
     }
 
