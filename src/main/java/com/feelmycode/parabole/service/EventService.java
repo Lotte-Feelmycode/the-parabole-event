@@ -194,8 +194,7 @@ public class EventService {
      * 이벤트 전체 조회 (삭제된 이벤트 제외)
      */
     public List<Event> getEventsAllNotDeleted() {
-        return eventRepository.findAllByIsDeletedOrderByStartAt(false).stream()
-            .sorted(Comparator.comparing(Event::getCreatedAt).reversed()).toList();
+        return eventRepository.findAllByIsDeletedOrderByStartAt(false);
     }
 
     /**
