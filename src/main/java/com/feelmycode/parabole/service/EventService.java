@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -194,7 +195,15 @@ public class EventService {
      * 이벤트 전체 조회 (삭제된 이벤트 제외)
      */
     public List<Event> getEventsAllNotDeleted() {
-        return eventRepository.findAllByIsDeletedOrderByStartAt(false);
+        List<String> types = Arrays.asList("RAFFLE", "FCFS");
+        return Stream.concat(
+            eventRepository.findAllByTypeInAndStatusInAndTitleContainingAndIsDeleted(
+                    types, Arrays.asList(1), "", false).stream()
+                .sorted(Comparator.comparing(Event::getStartAt)),
+            eventRepository.findAllByTypeInAndStatusInAndTitleContainingAndIsDeleted(
+                    types, Arrays.asList(0, 2), "", false).stream()
+                .sorted(Comparator.comparing(Event::getStatus))
+        ).collect(Collectors.toList());
     }
 
     /**
