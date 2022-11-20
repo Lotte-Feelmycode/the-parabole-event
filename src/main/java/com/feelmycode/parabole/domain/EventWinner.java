@@ -33,9 +33,10 @@ public class EventWinner {
     @JoinColumn(name="event_participant_id")
     private EventParticipant eventParticipant;
 
-    public EventWinner(Long userId, Event event, EventPrize eventPrize){
+    public EventWinner(Long userId, Event event, EventPrize eventPrize, EventParticipant eventParticipant){
         this.userId = userId;
         this.event = event;
         this.eventPrize = eventPrize;
+        this.eventParticipant = eventParticipant;
     }
 }

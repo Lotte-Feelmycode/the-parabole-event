@@ -145,7 +145,7 @@ public class EventParticipantService {
                 stock--;
                 eventWinnerRepository.save(
                     new EventWinner(eventParticipant.getUserId(), eventParticipant.getEvent(),
-                        eventParticipant.getEventPrize()));
+                        eventParticipant.getEventPrize(), eventParticipant));
             }
             EventPrize resultEventPrize = getEventPrize(prizeId);
             resultEventPrize.setStock(stock);
@@ -186,20 +186,20 @@ public class EventParticipantService {
         EventPrize eventPrize = getEventPrize(prizeId);
         Integer stock = eventPrize.getStock();
         Random randomNum = new Random();
-        Map<Long, Integer> applyMap = new HashMap<>();
+        Map<EventParticipant, Integer> applyMap = new HashMap<>();
         for (EventParticipant raffle : raffleList) {
             randomNum.setSeed(
                 raffle.getEventTimeStartAt().atZone(ZoneId.of("Asia/Seoul")).toInstant()
                     .toEpochMilli());
             Integer num = (randomNum.nextInt(raffleList.size()) + 1);
-            applyMap.put(raffle.getUserId(), num);
+            applyMap.put(raffle, num);
         }
-        List<Map.Entry<Long, Integer>> entryList = new LinkedList<>(applyMap.entrySet());
+        List<Map.Entry<EventParticipant, Integer>> entryList = new LinkedList<>(applyMap.entrySet());
         entryList.sort(Map.Entry.comparingByValue());
-        for (Map.Entry<Long, Integer> entry : entryList) {
+        for (Map.Entry<EventParticipant, Integer> entry : entryList) {
             if (stock != 0) {
                 eventWinnerRepository.save(
-                    new EventWinner(entry.getKey(), raffleEvent, eventPrize));
+                    new EventWinner(entry.getKey().getUserId(), raffleEvent, eventPrize, entry.getKey()));
                 stock--;
             }
         }
